@@ -1,0 +1,38 @@
+# maven ignore
+*target/
+!tools/*.jar
+*.war
+*.zip
+*.tar
+*.tar.gz
+
+# Java class files
+*.class
+
+# eclipse ignore
+*.settings/
+.project
+.classpath
+
+# idea ignore
+.idea/
+*.ipr
+*.iml
+*.iws
+
+# temp ignore
+*.log
+*.log.*
+*.cache
+*.diff
+*.patch
+*.tmp
+
+# system ignore
+.DS_Store
+Thumbs.db
+
+sublime-project
+sublime-project.sublime-workspace
+
+coverage-report/
