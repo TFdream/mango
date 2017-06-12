@@ -1,6 +1,7 @@
 package com.mindflow.framework.rpc.server;
 
-import com.mindflow.framework.rpc.annotation.RpcService;
+import com.mindflow.framework.annotation.RpcService;
+import com.mindflow.framework.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -18,6 +19,9 @@ import java.util.Map;
 public class RpcServer implements ApplicationContextAware, InitializingBean, DisposableBean {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private RegistryService registryService;
+    private String protocol;
+
     @Override
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
 
@@ -33,6 +37,14 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
                 logger.info("export interface:{}, name:{}, version:{}", interfaceName, name, version);
             }
         }
+    }
+
+    public void setRegistryService(RegistryService registryService) {
+        this.registryService = registryService;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     @Override
