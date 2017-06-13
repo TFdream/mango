@@ -13,6 +13,8 @@
 
   <modules>
     <module>rpc-core</module>
+    <module>rpc-registry</module>
+    <module>rpc-serializer</module>
     <module>rpc-demo</module>
   </modules>
 

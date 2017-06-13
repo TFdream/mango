@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>rpc</artifactId>
+        <groupId>com.mindflow</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>rpc-serializer</artifactId>
+    <packaging>pom</packaging>
+
+    <name>rpc-serializer</name>
+    <url>http://maven.apache.org</url>
+
+    <modules>
+        <module>rpc-serializer-hessian</module>
+        <module>rpc-serializer-protostuff</module>
+        <module>rpc-serializer-msgpack</module>
+        <module>rpc-serializer-kryo</module>
+        <module>rpc-serializer-jackson</module>
+        <module>rpc-serializer-fastjson</module>
+        <module>rpc-serializer-fst</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mindflow</groupId>
+            <artifactId>rpc-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
+</project>

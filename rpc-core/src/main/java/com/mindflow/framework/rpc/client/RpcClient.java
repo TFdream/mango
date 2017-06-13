@@ -1,11 +1,9 @@
 package com.mindflow.framework.rpc.client;
 
-import com.mindflow.framework.registry.DiscoveryService;
-import com.mindflow.framework.rpc.DefaultRequest;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.concurrent.atomic.AtomicLong;
+import com.mindflow.framework.rpc.proxy.ClientInvocationHandler;
+import com.mindflow.framework.rpc.proxy.ProxyFactory;
+import com.mindflow.framework.rpc.proxy.jdk.JdkProxyFactory;
+import com.mindflow.framework.rpc.registry.DiscoveryService;
 
 /**
  * ${DESCRIPTION}
@@ -13,9 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Ricky Fung
  */
 public class RpcClient {
-    private AtomicLong idGenerator = new AtomicLong(0);
-
+    private transient volatile boolean initialized = false;
     private DiscoveryService discoveryService;
+    private long timeoutInMillis = 1000;
+    private ProxyFactory proxyFactory  = new JdkProxyFactory();
+    private ClientInvocationHandler handler = new ClientInvocationHandler();
 
     public RpcClient(DiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
@@ -26,19 +26,29 @@ public class RpcClient {
             throw new IllegalArgumentException("");
         }
 
-        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        checkInit();
 
-                DefaultRequest request = new DefaultRequest();
-                request.setRequestId(idGenerator.getAndIncrement());
-                request.setClassName(method.getDeclaringClass().getName());
-                request.setMethodName(method.getName());
-                request.setParameterTypes(method.getParameterTypes());
-                request.setArguments(args);
+        return proxyFactory.getProxy(interfaceClass, handler);
+    }
 
-                return null;
-            }
-        });
+    private void checkInit() {
+        if (!initialized) {
+            doInit();
+        }
+    }
+
+    private void doInit() {
+        if (initialized) {
+            return;
+        }
+
+        //do...
+        try {
+            discoveryService.discover(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        initialized = true;
     }
 }

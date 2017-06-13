@@ -1,7 +1,7 @@
 package com.mindflow.framework.rpc.server;
 
-import com.mindflow.framework.annotation.RpcService;
-import com.mindflow.framework.registry.RegistryService;
+import com.mindflow.framework.rpc.annotation.RpcService;
+import com.mindflow.framework.rpc.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

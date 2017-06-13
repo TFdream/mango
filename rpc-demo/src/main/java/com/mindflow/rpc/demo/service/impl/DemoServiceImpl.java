@@ -1,6 +1,6 @@
 package com.mindflow.rpc.demo.service.impl;
 
-import com.mindflow.framework.annotation.RpcService;
+import com.mindflow.framework.rpc.annotation.RpcService;
 import com.mindflow.rpc.demo.model.User;
 import com.mindflow.rpc.demo.service.DemoService;
 import java.util.List;

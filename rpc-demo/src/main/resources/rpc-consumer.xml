@@ -14,7 +14,7 @@
     <context:property-placeholder location="classpath:config.properties"/>
 
     <!-- 配置服务发现组件 -->
-    <bean id="discoveryService" class="com.mindflow.framework.registry.zookeeper.ZookeeperDiscoveryService">
+    <bean id="discoveryService" class="com.mindflow.framework.rpc.registry.zookeeper.ZookeeperDiscoveryService">
         <constructor-arg name="address" value="${registry.address}"/>
         <constructor-arg name="timeout" value="${registry.timeout}"/>
     </bean>
