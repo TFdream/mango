@@ -40,5 +40,11 @@
             <artifactId>rpc-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.mindflow</groupId>
+            <artifactId>rpc-registry-zk</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 </project>

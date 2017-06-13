@@ -3,6 +3,10 @@ package com.mindflow.framework.rpc.transport;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.DefaultResponse;
 import com.mindflow.framework.rpc.config.NettyServerConfig;
+import com.mindflow.framework.rpc.exception.RpcServiceException;
+import com.mindflow.framework.rpc.serializer.Serializer;
+import com.mindflow.framework.rpc.serializer.SerializerFactory;
+import com.mindflow.framework.rpc.server.MessageHandler;
 import com.mindflow.framework.rpc.transport.codec.NettyDecoder;
 import com.mindflow.framework.rpc.transport.codec.NettyEncoder;
 import com.mindflow.framework.rpc.util.Constants;
@@ -20,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -36,11 +41,13 @@ public class NettyServerImpl implements NettyServer {
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
 
     private ThreadPoolExecutor pool;    //业务处理线程池
+    private Serializer serializer;
 
     private NettyServerConfig config;
 
     public NettyServerImpl(NettyServerConfig config){
         this.config = config;
+        serializer = SerializerFactory.getSerializer("");
     }
 
     @Override
@@ -58,8 +65,8 @@ public class NettyServerImpl implements NettyServer {
                     public void initChannel(SocketChannel ch)
                             throws IOException {
 
-                        ch.pipeline().addLast(new NettyDecoder(null, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(null), //
+                        ch.pipeline().addLast(new NettyDecoder(serializer, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(serializer), //
                                 new NettyServerHandler());
                     }
                 });
@@ -82,12 +89,14 @@ public class NettyServerImpl implements NettyServer {
                 }
             }
         });
-        logger.info("Rpc Server bind port:"+config.getPort());
+        logger.info("Rpc Server bind port:{}", config.getPort());
     }
 
     @Override
     public void shutdown() {
-
+        this.bossGroup.shutdownGracefully();
+        this.workerGroup.shutdownGracefully();
+        this.pool.shutdown();
     }
 
     class NettyServerHandler extends SimpleChannelInboundHandler<DefaultRequest> {
@@ -102,26 +111,40 @@ public class NettyServerImpl implements NettyServer {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            super.exceptionCaught(ctx, cause);
-            logger.error("捕获异常", cause);
+            logger.error("NettyServerHandler exceptionCaught: remote=" + ctx.channel().remoteAddress()
+                    + " local=" + ctx.channel().localAddress(), cause);
+            ctx.channel().close();
         }
     }
 
+    /**处理客户端请求**/
     private void processRpcRequest(final ChannelHandlerContext context, final DefaultRequest request) {
+        final long processStartTime = System.currentTimeMillis();
+        try {
+            this.pool.execute(new Runnable() {
+                @Override
+                public void run() {
 
-        this.pool.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                DefaultResponse response = new DefaultResponse();
-                response.setRequestId(request.getRequestId());
-                response.setResult(null);
-
-                if(true){    //非单向调用
-                    context.writeAndFlush(response);
+                    processRpcRequest(context, request, processStartTime);
                 }
-                logger.info("Rpc server process request:{} end...", request.getRequestId());
-            }
-        });
+            });
+        } catch (RejectedExecutionException e) {
+            DefaultResponse response = new DefaultResponse();
+            response.setRequestId(request.getRequestId());
+            response.setException(new RpcServiceException("process thread pool is full, reject"));
+            response.setProcessTime(System.currentTimeMillis() - processStartTime);
+            context.channel().write(response);
+        }
+
+    }
+
+    private void processRpcRequest(ChannelHandlerContext context, DefaultRequest request, long processStartTime) {
+
+        DefaultResponse response = MessageHandler.getInstance().invoke(request, processStartTime);
+
+        if(request.getType()!=Constants.REQUEST_ONEWAY){    //非单向调用
+            context.writeAndFlush(response);
+        }
+        logger.info("Rpc server process request:{} end...", request.getRequestId());
     }
 }

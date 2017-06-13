@@ -1,0 +1,5 @@
+protostuff=com.mindflow.framework.rpc.serializer.protostuff.ProtostuffSerializer
+hessian=com.mindflow.framework.rpc.serializer.hessian.HessianSerializer
+kryo=com.mindflow.framework.rpc.serializer.kryo.KryoSerializer
+fastjson=com.mindflow.framework.rpc.serializer.fastjson.FastjsonSerializer
+jackson=com.mindflow.framework.rpc.serializer.jackson.JacksonSerializer

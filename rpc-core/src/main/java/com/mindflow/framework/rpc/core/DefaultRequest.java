@@ -1,5 +1,6 @@
 package com.mindflow.framework.rpc.core;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,12 +10,16 @@ import java.util.Map;
  *
  * @author Ricky Fung
  */
-public class DefaultRequest implements Request {
+public class DefaultRequest implements Serializable, Request {
+
+    private static final long serialVersionUID = 7478520607109127572L;
+
     private Long requestId;
     private String className;
     private String methodName;
-    private Object[] args;
+    private Object[] arguments;
     private Class<?>[] parameterTypes;
+    private byte type;  //请求类型
     private Map<String, String> attachments;
 
     @Override
@@ -46,11 +51,11 @@ public class DefaultRequest implements Request {
 
     @Override
     public Object[] getArguments() {
-        return args;
+        return arguments;
     }
 
-    public void setArguments(Object[] args) {
-        this.args = args;
+    public void setArguments(Object[] arguments) {
+        this.arguments = arguments;
     }
 
     @Override
@@ -60,6 +65,14 @@ public class DefaultRequest implements Request {
 
     public void setParameterTypes(Class<?>[] parameterTypes) {
         this.parameterTypes = parameterTypes;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
+
+    public byte getType() {
+        return type;
     }
 
     @Override
@@ -84,4 +97,5 @@ public class DefaultRequest implements Request {
         }
         attachments.put(key, value);
     }
+
 }

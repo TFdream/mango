@@ -9,6 +9,8 @@ import java.nio.charset.Charset;
  */
 public class StringUtils {
 
+    public static final String EMPTY = "";
+
     public static final Charset UTF8 = Charset.forName("UTF-8");
 
     public static String getString(byte[] data) {
@@ -25,6 +27,7 @@ public class StringUtils {
     public static byte[] getBytes(String str, Charset charset) {
         return str.getBytes(charset);
     }
+
 
     public static boolean isEmpty(final CharSequence cs) {
         return cs == null || cs.length() == 0;

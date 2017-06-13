@@ -6,6 +6,8 @@ import com.mindflow.framework.rpc.core.Response;
 import com.mindflow.framework.rpc.core.ResponseFuture;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.exception.TransportException;
+import com.mindflow.framework.rpc.serializer.Serializer;
+import com.mindflow.framework.rpc.serializer.SerializerFactory;
 import com.mindflow.framework.rpc.transport.codec.NettyDecoder;
 import com.mindflow.framework.rpc.transport.codec.NettyEncoder;
 import com.mindflow.framework.rpc.util.Constants;
@@ -45,12 +47,15 @@ public class NettyClientImpl implements NettyClient {
     private final ConcurrentHashMap<String, ChannelWrapper> channelTable =
             new ConcurrentHashMap<>();
 
+    private Serializer serializer;
+
     private ScheduledExecutorService scheduledExecutorService;
 
     private NettyClientConfig config;
 
     public NettyClientImpl(NettyClientConfig config) {
         this.config = config;
+        serializer = SerializerFactory.getSerializer("");
     }
 
     @Override
@@ -65,8 +70,8 @@ public class NettyClientImpl implements NettyClient {
                     @Override
                     public void initChannel(SocketChannel ch)
                             throws Exception {
-                        ch.pipeline().addLast(new NettyDecoder(null, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(null), //
+                        ch.pipeline().addLast(new NettyDecoder(serializer, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(serializer), //
                                 new NettyClientHandler());
                     }
                 });
@@ -147,7 +152,7 @@ public class NettyClientImpl implements NettyClient {
         }
     }
 
-    private Channel getChannel(String address){
+    private Channel getChannel(String address) throws InterruptedException {
 
         ChannelWrapper cw = this.channelTable.get(address);
         if (cw != null && cw.isActive()) {
@@ -156,7 +161,7 @@ public class NettyClientImpl implements NettyClient {
 
         synchronized (this){
             // 发起异步连接操作
-            ChannelFuture channelFuture = b.connect(NetUtils.parseSocketAddress(address));
+            ChannelFuture channelFuture = b.connect(NetUtils.parseSocketAddress(address)).sync();
             cw = new ChannelWrapper(channelFuture);
             this.channelTable.put(address, cw);
         }

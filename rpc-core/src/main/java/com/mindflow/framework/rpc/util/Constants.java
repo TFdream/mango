@@ -19,4 +19,9 @@ public class Constants {
     public static final byte FLAG_REQUEST = 0x01;
     public static final byte FLAG_RESPONSE = 0x03;
     public static final byte FLAG_OTHER = (byte) 0xFF;
+
+
+    public static final byte REQUEST_ONEWAY = 0x03;
+    public static final byte REQUEST_SYNC = 0x05;
+    public static final byte REQUEST_ASYNC = 0x07;
 }

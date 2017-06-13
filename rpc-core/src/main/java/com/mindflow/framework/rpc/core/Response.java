@@ -11,7 +11,7 @@ public interface Response {
 
     Long getRequestId();
 
-    Throwable getException();
+    Exception getException();
 
     Object getResult();
 
@@ -20,4 +20,6 @@ public interface Response {
     String getAttachment(String key);
 
     String getAttachment(String key, String defaultValue);
+
+    void setAttachment(String key, String value);
 }

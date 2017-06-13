@@ -5,7 +5,9 @@ package com.mindflow.framework.rpc.exception;
  *
  * @author Ricky Fung
  */
-public class TransportException extends RuntimeException {
+public class TransportException extends AbstractRpcException {
+
+    private static final long serialVersionUID = 1391824218667687554L;
 
     public TransportException() {
     }

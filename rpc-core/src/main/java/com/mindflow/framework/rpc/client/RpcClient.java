@@ -15,7 +15,7 @@ public class RpcClient {
     private DiscoveryService discoveryService;
     private long timeoutInMillis = 1000;
     private ProxyFactory proxyFactory  = new JdkProxyFactory();
-    private ClientInvocationHandler handler = new ClientInvocationHandler();
+    private ClientInvocationHandler handler = new ClientInvocationHandler(timeoutInMillis);
 
     public RpcClient(DiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
