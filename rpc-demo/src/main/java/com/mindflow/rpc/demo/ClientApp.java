@@ -1,9 +1,12 @@
 package com.mindflow.rpc.demo;
 
 import com.mindflow.framework.rpc.client.RpcClient;
+import com.mindflow.rpc.demo.model.User;
 import com.mindflow.rpc.demo.service.DemoService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.List;
 
 /**
  * Hello world!
@@ -20,6 +23,9 @@ public class ClientApp {
         DemoService service = rpcClient.create(DemoService.class);
 
         service.hello("rpc");
-        System.out.println(service.echo("rpc"));
+        System.out.println("echo:"+service.echo("rpc"));
+
+        List<User> users = service.getUsers(28);
+        System.out.println("users:"+users);
     }
 }

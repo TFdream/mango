@@ -22,7 +22,7 @@
     <!-- 配置 RPC 服务器 -->
     <bean id="rpcServer" class="com.mindflow.framework.rpc.server.RpcServer">
         <property name="protocol" value="hessian" />
-        <property name="port" value="8001" />
+        <property name="port" value="21918" />
         <property name="registryService" ref="registryService" />
     </bean>
 

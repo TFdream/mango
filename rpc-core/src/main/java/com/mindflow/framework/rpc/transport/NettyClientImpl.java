@@ -1,9 +1,6 @@
 package com.mindflow.framework.rpc.transport;
 
-import com.mindflow.framework.rpc.core.DefaultResponseFuture;
-import com.mindflow.framework.rpc.core.Request;
-import com.mindflow.framework.rpc.core.Response;
-import com.mindflow.framework.rpc.core.ResponseFuture;
+import com.mindflow.framework.rpc.core.*;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.exception.TransportException;
 import com.mindflow.framework.rpc.serializer.Serializer;
@@ -65,7 +62,6 @@ public class NettyClientImpl implements NettyClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_RCVBUF, config.getReceivedBufferSize())
                 .option(ChannelOption.SO_SNDBUF, config.getSendBufferSize())
-                .option(ChannelOption.SO_BACKLOG, config.getBacklogSize())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch)
@@ -84,7 +80,7 @@ public class NettyClientImpl implements NettyClient {
             public void run() {
                 scanRpcFutureTable();
             }
-        }, 0, 2000, TimeUnit.MILLISECONDS);
+        }, 0, 5000, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -141,7 +137,16 @@ public class NettyClientImpl implements NettyClient {
                 throws Exception {
 
             logger.info("client read msg:{}, ", msg);
+            if(msg instanceof Response) {
+                DefaultResponse response = (DefaultResponse) msg;
 
+                ResponseFuture<Response> rpcFuture =responseFutureMap.get(response.getRequestId());
+                if(rpcFuture!=null) {
+                    responseFutureMap.remove(response.getRequestId());
+                    rpcFuture.setResult(response);
+                }
+
+            }
         }
 
         @Override

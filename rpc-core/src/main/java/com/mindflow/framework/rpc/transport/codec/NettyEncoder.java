@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ricky Fung
  */
-public class NettyEncoder<T> extends MessageToByteEncoder<T> {
+public class NettyEncoder extends MessageToByteEncoder {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private Serializer codec;
 
@@ -25,7 +25,7 @@ public class NettyEncoder<T> extends MessageToByteEncoder<T> {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, T msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
 
         long requestId = getRequestId(msg);
         byte[] data = null;
