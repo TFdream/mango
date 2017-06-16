@@ -1,12 +1,10 @@
 package com.mindflow.framework.rpc.transport;
 
-import com.mindflow.framework.rpc.core.*;
+import com.mindflow.framework.rpc.codec.Codec;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
+import com.mindflow.framework.rpc.core.*;
+import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
 import com.mindflow.framework.rpc.exception.TransportException;
-import com.mindflow.framework.rpc.serializer.Serializer;
-import com.mindflow.framework.rpc.serializer.SerializerFactory;
-import com.mindflow.framework.rpc.transport.codec.NettyDecoder;
-import com.mindflow.framework.rpc.transport.codec.NettyEncoder;
 import com.mindflow.framework.rpc.util.Constants;
 import com.mindflow.framework.rpc.util.NetUtils;
 import io.netty.bootstrap.Bootstrap;
@@ -44,7 +42,7 @@ public class NettyClientImpl implements NettyClient {
     private final ConcurrentHashMap<String, ChannelWrapper> channelTable =
             new ConcurrentHashMap<>();
 
-    private Serializer serializer;
+    private Codec codec;
 
     private ScheduledExecutorService scheduledExecutorService;
 
@@ -52,7 +50,7 @@ public class NettyClientImpl implements NettyClient {
 
     public NettyClientImpl(NettyClientConfig config) {
         this.config = config;
-        serializer = SerializerFactory.getSerializer("");
+        codec = ExtensionLoader.getExtensionLoader(Codec.class).getDefaultExtension();
     }
 
     @Override
@@ -66,8 +64,8 @@ public class NettyClientImpl implements NettyClient {
                     @Override
                     public void initChannel(SocketChannel ch)
                             throws Exception {
-                        ch.pipeline().addLast(new NettyDecoder(serializer, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(serializer), //
+                        ch.pipeline().addLast(new NettyDecoder(codec, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(codec), //
                                 new NettyClientHandler());
                     }
                 });

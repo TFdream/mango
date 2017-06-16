@@ -1,10 +1,9 @@
-package com.mindflow.framework.rpc.transport.codec;
+package com.mindflow.framework.rpc.transport;
 
-import com.mindflow.framework.rpc.core.DefaultRequest;
+import com.mindflow.framework.rpc.codec.Codec;
 import com.mindflow.framework.rpc.core.DefaultResponse;
 import com.mindflow.framework.rpc.core.Response;
-import com.mindflow.framework.rpc.exception.RpcServiceException;
-import com.mindflow.framework.rpc.serializer.Serializer;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 import com.mindflow.framework.rpc.util.Constants;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,9 +20,9 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private int maxFrameLength;
-    private Serializer codec;
+    private Codec codec;
 
-    public NettyDecoder(Serializer codec, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
+    public NettyDecoder(Codec codec, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
         super(maxFrameLength, lengthFieldOffset, lengthFieldLength);
         this.codec = codec;
         this.maxFrameLength = maxFrameLength;
@@ -44,7 +43,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
         short magicType = in.readShort();
         if (magicType != Constants.NETTY_MAGIC_TYPE) {
             in.resetReaderIndex();
-            throw new RpcServiceException("RpcDecoder transport header not support, type: " + magicType);
+            throw new RpcFrameworkException("RpcDecoder transport header not support, type: " + magicType);
         }
 
         byte messageType = in.readByte();
@@ -62,7 +61,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
                     "NettyDecoder transport data content length over of limit, size: {}  > {}. remote={} local={}",
                     dataLength, maxFrameLength, ctx.channel().remoteAddress(), ctx.channel()
                             .localAddress());
-            Exception e = new RpcServiceException("NettyDecoder transport data content length over of limit, size: "
+            Exception e = new RpcFrameworkException("NettyDecoder transport data content length over of limit, size: "
                     + dataLength + " > " + maxFrameLength);
 
             if (messageType == Constants.FLAG_REQUEST) {
@@ -77,10 +76,18 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
         byte[] data = new byte[dataLength];
         in.readBytes(data);
 
-        if(messageType == Constants.FLAG_REQUEST) {
-            return codec.decode(data, DefaultRequest.class);
+        try {
+            return codec.decode(ctx.channel(), messageType, data);
+        } catch (Exception e) {
+            if (messageType == Constants.FLAG_REQUEST) {
+                Response response = buildExceptionResponse(requestId, e);
+                ctx.write(response);
+                return null;
+            } else {
+                Response response = buildExceptionResponse(requestId, e);
+                return response;
+            }
         }
-        return codec.decode(data, DefaultResponse.class);
     }
 
     private Response buildExceptionResponse(long requestId, Exception e) {

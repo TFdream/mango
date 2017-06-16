@@ -3,7 +3,7 @@ package com.mindflow.framework.rpc.server;
 import com.google.common.collect.Maps;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.DefaultResponse;
-import com.mindflow.framework.rpc.exception.RpcServiceException;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,7 +43,7 @@ public class MessageHandler {
                 e.printStackTrace();
             }
         } else {
-            RpcServiceException ex = new RpcServiceException("");
+            RpcFrameworkException ex = new RpcFrameworkException("");
             response.setException(ex);
         }
         response.setProcessTime(System.currentTimeMillis() - processStartTime);

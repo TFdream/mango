@@ -1,6 +1,6 @@
 package com.mindflow.framework.rpc.registry;
 
-import com.mindflow.framework.rpc.URL;
+import com.mindflow.framework.rpc.common.URL;
 
 /**
  * @author Ricky Fung

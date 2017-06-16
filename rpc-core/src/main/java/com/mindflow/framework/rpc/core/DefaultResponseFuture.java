@@ -1,6 +1,6 @@
 package com.mindflow.framework.rpc.core;
 
-import com.mindflow.framework.rpc.exception.RpcServiceException;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 import java.io.IOException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
@@ -69,7 +69,7 @@ public class DefaultResponseFuture<T> extends AbstractResponseFuture<T> {
             if(this.state == FutureState.CANCELLED) {
                 throw new CancellationException();
             } else {
-                throw new RpcServiceException(this.err);
+                throw new RpcFrameworkException(this.err);
             }
         } else {
             return this.result;

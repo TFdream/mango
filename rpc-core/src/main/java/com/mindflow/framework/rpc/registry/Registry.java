@@ -1,12 +1,13 @@
 package com.mindflow.framework.rpc.registry;
 
 import com.mindflow.framework.rpc.common.URL;
-import java.util.List;
 
 /**
+ * ${DESCRIPTION}
+ *
  * @author Ricky Fung
  */
-public interface NotifyListener {
+public interface Registry extends RegistryService, DiscoveryService {
 
-    void notify(URL registryUrl, List<URL> urls);
+    URL getUrl();
 }

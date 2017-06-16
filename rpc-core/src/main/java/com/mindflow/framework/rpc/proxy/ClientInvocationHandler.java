@@ -3,7 +3,7 @@ package com.mindflow.framework.rpc.proxy;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.Response;
-import com.mindflow.framework.rpc.exception.RpcServiceException;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 import com.mindflow.framework.rpc.transport.NettyClient;
 import com.mindflow.framework.rpc.transport.NettyClientImpl;
 import com.mindflow.framework.rpc.util.Constants;
@@ -34,7 +34,7 @@ public class ClientInvocationHandler implements InvocationHandler {
             if ("toString".equals(method.getName())) {
                 return "";
             }
-            throw new RpcServiceException("can not invoke local method:" + method.getName());
+            throw new RpcFrameworkException("can not invoke local method:" + method.getName());
         }
 
         DefaultRequest request = new DefaultRequest();
@@ -49,14 +49,14 @@ public class ClientInvocationHandler implements InvocationHandler {
             Response resp = nettyClient.invokeSync("127.0.0.1:21918", request, timeoutInMillis);
             return getValue(resp);
         } catch (RuntimeException e) {
-            throw new RpcServiceException("", e);
+            throw new RpcFrameworkException("", e);
         }
     }
 
     public Object getValue(Response resp) {
         Exception exception = resp.getException();
         if (exception != null) {
-            throw (exception instanceof RuntimeException) ? (RuntimeException) exception : new RpcServiceException(
+            throw (exception instanceof RuntimeException) ? (RuntimeException) exception : new RpcFrameworkException(
                     exception.getMessage(), exception);
         }
         return resp.getResult();

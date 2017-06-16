@@ -1,9 +1,9 @@
-package com.mindflow.framework.rpc.transport.codec;
+package com.mindflow.framework.rpc.transport;
 
+import com.mindflow.framework.rpc.codec.Codec;
 import com.mindflow.framework.rpc.core.DefaultResponse;
 import com.mindflow.framework.rpc.core.Request;
 import com.mindflow.framework.rpc.core.Response;
-import com.mindflow.framework.rpc.serializer.Serializer;
 import com.mindflow.framework.rpc.util.Constants;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
  */
 public class NettyEncoder extends MessageToByteEncoder {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Serializer codec;
+    private Codec codec;
 
-    public NettyEncoder(Serializer codec) {
+    public NettyEncoder(Codec codec) {
         this.codec = codec;
     }
 
@@ -32,14 +32,14 @@ public class NettyEncoder extends MessageToByteEncoder {
 
         if (msg instanceof Response) {
             try {
-                data = codec.encode(msg);
+                data = codec.encode(ctx.channel(), msg);
             } catch (Exception e) {
                 logger.error("RpcEncoder encode error, requestId=" + requestId, e);
                 Response response = buildExceptionResponse(requestId, e);
-                data = codec.encode(response);
+                data = codec.encode(ctx.channel(), response);
             }
         } else {
-            data = codec.encode(msg);
+            data = codec.encode(ctx.channel(), msg);
         }
 
         out.writeShort(Constants.NETTY_MAGIC_TYPE);

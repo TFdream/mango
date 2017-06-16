@@ -9,6 +9,11 @@ public class Constants {
 
     public static final String FRAMEWORK_NAME = "rpc";
 
+    public static final String PROTOCOL_SEPARATOR = "://";
+    public static final String PATH_SEPARATOR = "/";
+
+    public static final String ZOOKEEPER_REGISTRY_NAMESPACE = "/rpc";
+
     public static final int MAX_FRAME_LENGTH = 1<<20;
 
     //头部信息的大小应该是 short+byte+long+int = 2+1+8+4 = 15
@@ -24,4 +29,6 @@ public class Constants {
     public static final byte REQUEST_ONEWAY = 0x03;
     public static final byte REQUEST_SYNC = 0x05;
     public static final byte REQUEST_ASYNC = 0x07;
+
+    public static final int DEFAULT_PORT = 21918;
 }

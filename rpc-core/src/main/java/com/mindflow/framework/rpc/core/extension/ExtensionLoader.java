@@ -186,6 +186,10 @@ public class ExtensionLoader<T> {
         return Collections.unmodifiableMap(extensionClasses);
     }
 
+    /**
+     * 添加SPI接口实现类
+     * @param clz
+     */
     public void addExtensionClass(Class<T> clz) {
         if (clz == null) {
             return;

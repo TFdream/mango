@@ -13,7 +13,7 @@ import java.io.IOException;
 @SPI(value = "protostuff", scope = Scope.SINGLETON)
 public interface Serializer {
 
-    byte[] encode(Object msg) throws IOException;
+    byte[] serialize(Object msg) throws IOException;
 
-    <T> T decode(byte[] data, Class<T> type) throws IOException;
+    <T> T deserialize(byte[] data, Class<T> type) throws IOException;
 }

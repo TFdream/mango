@@ -1,14 +1,12 @@
 package com.mindflow.framework.rpc.transport;
 
+import com.mindflow.framework.rpc.codec.Codec;
+import com.mindflow.framework.rpc.config.NettyServerConfig;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.DefaultResponse;
-import com.mindflow.framework.rpc.config.NettyServerConfig;
-import com.mindflow.framework.rpc.exception.RpcServiceException;
-import com.mindflow.framework.rpc.serializer.Serializer;
-import com.mindflow.framework.rpc.serializer.SerializerFactory;
+import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 import com.mindflow.framework.rpc.server.MessageHandler;
-import com.mindflow.framework.rpc.transport.codec.NettyDecoder;
-import com.mindflow.framework.rpc.transport.codec.NettyEncoder;
 import com.mindflow.framework.rpc.util.Constants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -41,13 +39,13 @@ public class NettyServerImpl implements NettyServer {
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
 
     private ThreadPoolExecutor pool;    //业务处理线程池
-    private Serializer serializer;
+    private Codec codec;
 
     private NettyServerConfig config;
 
     public NettyServerImpl(NettyServerConfig config){
         this.config = config;
-        serializer = SerializerFactory.getSerializer("");
+        codec = ExtensionLoader.getExtensionLoader(Codec.class).getDefaultExtension();
     }
 
     @Override
@@ -65,8 +63,8 @@ public class NettyServerImpl implements NettyServer {
                     public void initChannel(SocketChannel ch)
                             throws IOException {
 
-                        ch.pipeline().addLast(new NettyDecoder(serializer, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(serializer), //
+                        ch.pipeline().addLast(new NettyDecoder(codec, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(codec), //
                                 new NettyServerHandler());
                     }
                 });
@@ -131,7 +129,7 @@ public class NettyServerImpl implements NettyServer {
         } catch (RejectedExecutionException e) {
             DefaultResponse response = new DefaultResponse();
             response.setRequestId(request.getRequestId());
-            response.setException(new RpcServiceException("process thread pool is full, reject"));
+            response.setException(new RpcFrameworkException("process thread pool is full, reject"));
             response.setProcessTime(System.currentTimeMillis() - processStartTime);
             context.channel().write(response);
         }
