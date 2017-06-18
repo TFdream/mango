@@ -29,5 +29,5 @@ public @interface RpcService {
      * 服务名
      * @return
      */
-    String name() default "";
+    String group() default "";
 }

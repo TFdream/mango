@@ -13,17 +13,17 @@
 
     <context:property-placeholder location="classpath:config.properties"/>
 
-    <!-- 配置服务注册组件 -->
-    <bean id="registryService" class="com.mindflow.framework.rpc.registry.zookeeper.ZookeeperRegistry">
-        <constructor-arg name="serverAddresses" value="${registry.address}"/>
-        <constructor-arg name="sessionTimeout" value="${registry.timeout}"/>
+    <!-- 服务注册配置 -->
+    <bean id="registryConfig" class="com.mindflow.framework.rpc.config.RegistryConfig">
+        <property name="protocol" value="${registry.protocol}"/>
+        <property name="address" value="${registry.address}"/>
     </bean>
 
     <!-- 配置 RPC 服务器 -->
     <bean id="rpcServer" class="com.mindflow.framework.rpc.server.RpcServer">
-        <property name="protocol" value="hessian" />
-        <property name="port" value="21918" />
-        <property name="registryService" ref="registryService" />
+        <property name="protocol" value="" />
+        <property name="serverAddress" value="127.0.0.1:21918" />
+        <property name="registryConfig" ref="registryConfig" />
     </bean>
 
 </beans>

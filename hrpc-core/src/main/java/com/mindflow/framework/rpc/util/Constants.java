@@ -7,12 +7,12 @@ package com.mindflow.framework.rpc.util;
  */
 public class Constants {
 
-    public static final String FRAMEWORK_NAME = "rpc";
+    public static final String FRAMEWORK_NAME = "hrpc";
 
     public static final String PROTOCOL_SEPARATOR = "://";
     public static final String PATH_SEPARATOR = "/";
 
-    public static final String ZOOKEEPER_REGISTRY_NAMESPACE = "/rpc";
+    public static final String ZOOKEEPER_REGISTRY_NAMESPACE = "/hrpc";
 
     public static final int MAX_FRAME_LENGTH = 1<<20;
 
@@ -31,4 +31,15 @@ public class Constants {
     public static final byte REQUEST_ASYNC = 0x07;
 
     public static final int DEFAULT_PORT = 21918;
+
+    //
+    public static final String REGISTRY_PROTOCOL = "reg_protocol";
+    public static final String REGISTRY_ADDRESS = "reg_address";
+
+    public static final String SERIALIZATION = "serializer";
+
+    public static final String SIDE = "side";
+    public static final String TIMESTAMP = "timestamp";
+
+
 }

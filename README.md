@@ -1,2 +1,2 @@
-# rpc
-A lightweight RPC Framework.
+# HRPC
+A high-performance, open-source java RPC framework. 

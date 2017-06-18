@@ -20,6 +20,7 @@ public enum URLParamName {
     /** service max worker threads **/
     maxWorkerThread("maxWorkerThread", 200),
 
+
     /**zookeeper**/
     registrySessionTimeout("registrySessionTimeout", 60*1000),
     registryConnectTimeout("registryConnectTimeout", 2000),
@@ -27,7 +28,7 @@ public enum URLParamName {
     /** serialize **/
     serializer("serializer", "protostuff"),
     /** codec **/
-    codec("codec", "rpc");
+    codec("codec", "hrpc");
 
     private String name;
     private String value;

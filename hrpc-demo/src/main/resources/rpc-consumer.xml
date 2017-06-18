@@ -13,15 +13,15 @@
 
     <context:property-placeholder location="classpath:config.properties"/>
 
-    <!-- 配置服务发现组件 -->
-    <bean id="discoveryService" class="com.mindflow.framework.rpc.registry.zookeeper.ZookeeperDiscoveryService">
-        <constructor-arg name="address" value="${registry.address}"/>
-        <constructor-arg name="timeout" value="${registry.timeout}"/>
+    <!-- 服务注册配置 -->
+    <bean id="registryConfig" class="com.mindflow.framework.rpc.config.RegistryConfig">
+        <property name="protocol" value="${registry.protocol}"/>
+        <property name="address" value="${registry.address}"/>
     </bean>
 
     <!-- 配置 RPC 客户端 -->
     <bean id="rpcClient" class="com.mindflow.framework.rpc.client.RpcClient">
-        <constructor-arg name="discoveryService" ref="discoveryService" />
+        <property name="registryConfig" ref="registryConfig" />
     </bean>
 
 </beans>

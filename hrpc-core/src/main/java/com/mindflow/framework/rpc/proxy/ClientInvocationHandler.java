@@ -1,9 +1,12 @@
 package com.mindflow.framework.rpc.proxy;
 
+import com.mindflow.framework.rpc.common.URL;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.Response;
 import com.mindflow.framework.rpc.exception.RpcFrameworkException;
+import com.mindflow.framework.rpc.registry.Registry;
+import com.mindflow.framework.rpc.registry.RegistryFactory;
 import com.mindflow.framework.rpc.transport.NettyClient;
 import com.mindflow.framework.rpc.transport.NettyClientImpl;
 import com.mindflow.framework.rpc.util.Constants;
@@ -11,6 +14,7 @@ import com.mindflow.framework.rpc.util.RequestIdGenerator;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * ${DESCRIPTION}
@@ -19,9 +23,22 @@ import java.lang.reflect.Method;
  */
 public class ClientInvocationHandler implements InvocationHandler {
     private NettyClient nettyClient;
+    private RegistryFactory registryFactory;
     private long timeoutInMillis;
-    public ClientInvocationHandler(long timeoutInMillis) {
+    private URL url;
+    private List<URL> urls;
+
+    public ClientInvocationHandler(URL url, RegistryFactory registryFactory, long timeoutInMillis) {
+        this.url = url;
+        this.registryFactory = registryFactory;
         this.timeoutInMillis = timeoutInMillis;
+
+        try {
+            this.urls = registryFactory.getRegistry(url).discover(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         nettyClient = new NettyClientImpl(new NettyClientConfig());
         nettyClient.start();
     }
@@ -46,6 +63,8 @@ public class ClientInvocationHandler implements InvocationHandler {
         request.setType(Constants.REQUEST_SYNC);
 
         try {
+            //load-balance
+
             Response resp = nettyClient.invokeSync("127.0.0.1:21918", request, timeoutInMillis);
             return getValue(resp);
         } catch (RuntimeException e) {
