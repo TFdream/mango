@@ -13,14 +13,12 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.mindflow.rpc.demo"/>
 
-    <context:property-placeholder location="classpath:config.properties"/>
-
     <hrpc:protocol name="hrpc" port="21918"/>
 
-    <hrpc:registry protocol="${registry.protocol}" address="${registry.address}" timeout="5000" />
+    <hrpc:registry protocol="zookeeper" address="127.0.0.1:2181" timeout="5000" />
 
     <!--引用服务-->
-    <hrpc:reference id="demoService" interface="com.mindflow.rpc.demo.service.DemoService"/>
+    <hrpc:reference id="demoService" interface="com.mindflow.rpc.demo.service.DemoService" group="group1" />
     <hrpc:reference id="userService" interface="com.mindflow.rpc.demo.service.UserService"/>
 
 </beans>

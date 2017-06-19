@@ -37,7 +37,10 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
 
     private NettyServer nettyServer;
     private transient ApplicationContext ctx;
-    private final List<URL> urls = new ArrayList<>();
+    private transient List<URL> urls;
+
+    private ProtocolConfig protocolConfig;
+    private RegistryConfig registryConfig;
 
     @Override
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
@@ -52,6 +55,90 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
 
     private void start() throws InterruptedException {
 
+        this.protocolConfig = checkProtocolConfig();
+        //注册中心
+        this.registryConfig = checkRegistryConfig();
+
+        //扫描Service
+        urls = loadRegistryUrls();
+
+        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(registryConfig.getProtocol());
+        for (URL url : urls) {
+            try {
+                registryFactory.getRegistry(url).register(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        NettyServerConfig config = new NettyServerConfig();
+        config.setPort(protocolConfig.getPort());
+        nettyServer = new NettyServerImpl(config);
+
+        nettyServer.bind();
+    }
+
+    private List<URL> loadRegistryUrls() {
+        List<URL> urlList = new ArrayList<>();
+        Map<String, ServiceConfig> serviceBeanMap = ctx.getBeansOfType(ServiceConfig.class);
+        if (serviceBeanMap!=null && serviceBeanMap.size()>0) {
+            for (ServiceConfig serviceConfig : serviceBeanMap.values()) {
+                String interfaceName = serviceConfig.getInterfaceName();
+                String version = serviceConfig.getVersion();
+                String group = serviceConfig.getGroup();
+                String serializer = protocolConfig.getSerialization();
+                Object ref = serviceConfig.getRef();
+
+                if (ref == null) {
+                    throw new IllegalStateException("ref not allow null!");
+                }
+                Class<?> interfaceClass;
+                try {
+                    interfaceClass = Class.forName(interfaceName, true, Thread.currentThread().getContextClassLoader());
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+                if(!interfaceClass.isAssignableFrom(ref.getClass())) {
+                    throw new IllegalArgumentException(serviceConfig.getClass() +" is not "+interfaceClass+" sub class!");
+                }
+
+                URL url = new URL(protocolConfig.getName(), protocolConfig.getHost(), protocolConfig.getPort(), interfaceName);
+                url.addParameter(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
+                url.addParameter(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
+                url.addParameter(URLParamName.serialization.getName(), StringUtils.isNotEmpty(serializer) ? serializer: URLParamName.serialization.getValue());
+                url.addParameter(Constants.REGISTRY_PROTOCOL, registryConfig.getProtocol());
+                url.addParameter(Constants.REGISTRY_ADDRESS, registryConfig.getAddress());
+                url.addParameter(Constants.SIDE, "provider");
+                url.addParameter(Constants.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+                urlList.add(url);
+
+                MessageHandler.getInstance().addServiceBean(interfaceName, ref);
+                logger.info("export interface:{}, group:{}, version:{}", interfaceName, group, version);
+            }
+        }
+        return urlList;
+    }
+
+    private RegistryConfig checkRegistryConfig() {
+        RegistryConfig registryConfig = null;
+        for (String name : HRpcNamespaceHandler.registryDefineNames) {
+            RegistryConfig rc = ctx.getBean(name, RegistryConfig.class);
+            if (rc == null) {
+                continue;
+            }
+            if (HRpcNamespaceHandler.registryDefineNames.size() == 1) {
+                registryConfig = rc;
+            } else if (rc.isDefault() != null && rc.isDefault().booleanValue()) {
+                registryConfig = rc;
+            }
+        }
+        if(registryConfig==null) {
+            registryConfig = HRpcUtils.getDefaultRegistryConfig();
+        }
+        return registryConfig;
+    }
+
+    private ProtocolConfig checkProtocolConfig() {
         ProtocolConfig protocolConfig = null;
         for (String name : HRpcNamespaceHandler.protocolDefineNames) {
             ProtocolConfig pc = ctx.getBean(name, ProtocolConfig.class);
@@ -75,74 +162,7 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
             protocolConfig.setPort(Constants.DEFAULT_PORT);
         }
 
-        //注册中心
-        RegistryConfig registryConfig = null;
-        for (String name : HRpcNamespaceHandler.registryDefineNames) {
-            RegistryConfig rc = ctx.getBean(name, RegistryConfig.class);
-            if (rc == null) {
-                continue;
-            }
-            if (HRpcNamespaceHandler.registryDefineNames.size() == 1) {
-                registryConfig = rc;
-            } else if (rc.isDefault() != null && rc.isDefault().booleanValue()) {
-                registryConfig = rc;
-            }
-        }
-        if(registryConfig==null) {
-            registryConfig = HRpcUtils.getDefaultRegistryConfig();
-        }
-
-        //扫描Service
-        Map<String, ServiceConfig> serviceBeanMap = ctx.getBeansOfType(ServiceConfig.class);
-        if (serviceBeanMap!=null && serviceBeanMap.size()>0) {
-            for (ServiceConfig serviceConfig : serviceBeanMap.values()) {
-                String interfaceName = serviceConfig.getInterfaceName();
-                String version = serviceConfig.getVersion();
-                String group = serviceConfig.getGroup();
-                Object ref = serviceConfig.getRef();
-
-                if (ref == null) {
-                    throw new IllegalStateException("ref not allow null!");
-                }
-                Class<?> interfaceClass;
-                try {
-                    interfaceClass = Class.forName(interfaceName, true, Thread.currentThread().getContextClassLoader());
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
-                if(!interfaceClass.isAssignableFrom(ref.getClass())) {
-                    throw new IllegalArgumentException(serviceConfig.getClass() +" is not "+interfaceClass+" sub class!");
-                }
-
-                URL url = new URL(protocolConfig.getName(), protocolConfig.getHost(), protocolConfig.getPort(), interfaceName);
-                url.addParameter(URLParamName.version.getName(), version);
-                url.addParameter(URLParamName.group.getName(), group!=null ? group : URLParamName.group.getValue());
-                url.addParameter(URLParamName.serializer.getName(), URLParamName.serializer.getValue());
-                url.addParameter(Constants.REGISTRY_PROTOCOL, registryConfig.getProtocol());
-                url.addParameter(Constants.REGISTRY_ADDRESS, registryConfig.getAddress());
-                url.addParameter(Constants.SIDE, "provider");
-                url.addParameter(Constants.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
-                urls.add(url);
-
-                MessageHandler.getInstance().addServiceBean(interfaceName, ref);
-                logger.info("export interface:{}, group:{}, version:{}", interfaceName, group, version);
-            }
-        }
-
-        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(registryConfig.getProtocol());
-        for (URL url : urls) {
-            try {
-                registryFactory.getRegistry(url).register(url);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        NettyServerConfig config = new NettyServerConfig();
-        config.setPort(protocolConfig.getPort());
-        nettyServer = new NettyServerImpl(config);
-
-        nettyServer.bind();
+        return protocolConfig;
     }
 
     @Override

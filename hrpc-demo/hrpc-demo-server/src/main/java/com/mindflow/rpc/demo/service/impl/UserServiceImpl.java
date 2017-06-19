@@ -18,7 +18,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long insert(User user) {
-        return null;
+        System.out.println("insert user"+user);
+        return 15L;
     }
 
     @Override

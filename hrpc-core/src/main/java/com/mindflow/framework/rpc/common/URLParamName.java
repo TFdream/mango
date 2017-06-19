@@ -14,7 +14,7 @@ public enum URLParamName {
     group("group", "default_rpc"),
 
     /** request timeout **/
-    requestTimeout("requestTimeout", 200),
+    requestTimeout("requestTimeout", 500),
     /** connect timeout **/
     connectTimeout("connectTimeout", 1000),
     /** service min worker threads **/
@@ -22,13 +22,14 @@ public enum URLParamName {
     /** service max worker threads **/
     maxWorkerThread("maxWorkerThread", 200),
 
+    retries("retries", 0),
 
     /**zookeeper**/
     registrySessionTimeout("registrySessionTimeout", 60*1000),
     registryConnectTimeout("registryConnectTimeout", 2000),
 
     /** serialize **/
-    serializer("serializer", "protostuff"),
+    serialization("serializer", "protostuff"),
     /** codec **/
     codec("codec", Constants.FRAMEWORK_NAME);
 

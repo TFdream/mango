@@ -13,6 +13,9 @@ import com.mindflow.framework.rpc.registry.RegistryFactory;
 import com.mindflow.framework.rpc.util.Constants;
 import com.mindflow.framework.rpc.util.HRpcUtils;
 import com.mindflow.framework.rpc.util.NetUtils;
+import com.mindflow.framework.rpc.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +28,7 @@ import java.net.InetAddress;
  * @author Ricky Fung
  */
 public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements FactoryBean<T>, BeanFactoryAware, InitializingBean, DisposableBean {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private transient BeanFactory beanFactory;
     private transient volatile boolean initialized;
@@ -62,11 +66,6 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
             throw new IllegalStateException("reference class not found", e);
         }
 
-        //检查默认值
-        if(timeout==null) {
-            timeout = URLParamName.requestTimeout.getIntValue();
-        }
-
         proxy = createProxy();
     }
 
@@ -81,6 +80,8 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
         URL url = new URL(URLParamName.codec.getValue(), localAddress.getHostAddress(), 0, interfaceClass.getName());
         url.addParameter(Constants.REGISTRY_PROTOCOL, registryConfig.getProtocol());
         url.addParameter(Constants.REGISTRY_ADDRESS, registryConfig.getAddress());
+        url.addParameter(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
+        url.addParameter(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
         url.addParameter(Constants.SIDE, "consumer");
         url.addParameter(Constants.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
 
@@ -102,6 +103,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
     @Override
     public void afterPropertiesSet() throws Exception {
 
+        logger.info("checkConfig");
         checkConfig();
     }
 
@@ -139,6 +141,20 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
         }
         if (CollectionUtils.isEmpty(getRegistries())) {
             setRegistry(HRpcUtils.getDefaultRegistryConfig());
+        }
+
+        if(StringUtils.isEmpty(getGroup())) {
+            setGroup(URLParamName.group.getValue());
+        }
+        if(StringUtils.isEmpty(getVersion())) {
+            setVersion(URLParamName.version.getValue());
+        }
+
+        if(getTimeout()==null) {
+            setTimeout(URLParamName.requestTimeout.getIntValue());
+        }
+        if(getRetries()==null) {
+            setRetries(URLParamName.retries.getIntValue());
         }
     }
 

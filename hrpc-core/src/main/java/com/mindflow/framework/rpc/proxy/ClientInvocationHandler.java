@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
 
+
 /**
  * ${DESCRIPTION}
  *
@@ -40,18 +41,8 @@ public class ClientInvocationHandler implements InvocationHandler, NotifyListene
         this.url = url;
         this.registryFactory = registryFactory;
         this.timeoutInMillis = timeoutInMillis;
-        this.loadBalanceStrategy = ExtensionLoader.getExtensionLoader(LoadBalance.class).getDefaultExtension();
-        try {
-            Registry registry = this.registryFactory.getRegistry(url);
-            this.urls = registry.discover(url);
-            //
-            registry.subscribe(url, this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        nettyClient = new NettyClientImpl(new NettyClientConfig());
-        nettyClient.start();
+        init();
     }
 
     @Override
@@ -92,6 +83,24 @@ public class ClientInvocationHandler implements InvocationHandler, NotifyListene
                     exception.getMessage(), exception);
         }
         return resp.getResult();
+    }
+
+    private void init() {
+        this.loadBalanceStrategy = ExtensionLoader.getExtensionLoader(LoadBalance.class).getDefaultExtension();
+        try {
+            Registry registry = this.registryFactory.getRegistry(url);
+            this.urls = registry.discover(url);
+            if(this.urls==null || this.urls.isEmpty()) {
+                throw new IllegalStateException("no provider for url:"+url);
+            }
+            //
+            registry.subscribe(url, this);
+        } catch (Exception e) {
+            throw new RuntimeException("init error", e);
+        }
+
+        nettyClient = new NettyClientImpl(new NettyClientConfig());
+        nettyClient.start();
     }
 
     @Override

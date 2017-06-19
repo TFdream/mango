@@ -13,16 +13,14 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.mindflow.rpc.demo"/>
 
-    <context:property-placeholder location="classpath:config.properties"/>
-
     <hrpc:protocol name="hrpc" port="21918"/>
 
-    <hrpc:registry protocol="${registry.protocol}" address="${registry.address}" timeout="5000" />
+    <hrpc:registry protocol="zookeeper" address="127.0.0.1:2181" timeout="5000" />
 
     <!-- 配置 RPC 服务器 -->
     <bean id="rpcServer" class="com.mindflow.framework.rpc.config.springsupport.RpcServer" />
 
-    <hrpc:service interface="com.mindflow.rpc.demo.service.impl.DemoServiceImpl" ref="demoService" group="group1" version="1.0.0" />
-    <hrpc:service interface="com.mindflow.rpc.demo.service.impl.UserServiceImpl" ref="userService" version="1.0.0" />
+    <hrpc:service interface="com.mindflow.rpc.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />
+    <hrpc:service interface="com.mindflow.rpc.demo.service.UserService" ref="userService" version="1.0.0" />
 
 </beans>
