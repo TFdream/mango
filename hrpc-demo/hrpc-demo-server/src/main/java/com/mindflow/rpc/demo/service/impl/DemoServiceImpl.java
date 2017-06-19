@@ -1,19 +1,17 @@
 package com.mindflow.rpc.demo.service.impl;
 
-import com.mindflow.framework.rpc.annotation.RpcService;
-import com.mindflow.rpc.demo.model.User;
 import com.mindflow.rpc.demo.service.DemoService;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Map;
 
 /**
  * @author Ricky Fung
  */
-@RpcService(DemoService.class)
+@Service("demoService")
 public class DemoServiceImpl implements DemoService {
-    private final AtomicLong counter = new AtomicLong(1);
 
     @Override
     public void hello(String msg) {
@@ -26,23 +24,11 @@ public class DemoServiceImpl implements DemoService {
     }
 
     @Override
-    public List<User> getUsers(int age) {
-
-        List<User> users = new ArrayList<>();
-        for(int i=0; i<5; i++) {
-            User user = new User();
-            user.setId(counter.getAndIncrement());
-            user.setName("ricky_"+user.getId());
-            user.setPassword("root");
-            user.setAge(age+i);
-            users.add(user);
-        }
-        return users;
+    public Map<String, String> introduce(String name, List<String> hobbies) {
+        System.out.println("name:"+name + ", hobbies:"+hobbies);
+        Map<String, String> map = new HashMap<>();
+        map.put("name", name);
+        return map;
     }
 
-    @Override
-    public int update(User user) {
-        System.out.println("update user:"+user);
-        return 1;
-    }
 }

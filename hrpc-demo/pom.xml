@@ -47,6 +47,12 @@
             <version>${springframework.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.mindflow</groupId>
+            <artifactId>hrpc-springsupport</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <!--exclude Spring Framework commons-logging dependency-->
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -1,4 +1,4 @@
-package com.mindflow.framework.rpc.annotation;
+package com.mindflow.framework.rpc.config.springsupport.annotation;
 
 import org.springframework.stereotype.Component;
 import java.lang.annotation.*;

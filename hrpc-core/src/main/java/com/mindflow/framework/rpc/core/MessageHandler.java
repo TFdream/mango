@@ -1,8 +1,6 @@
-package com.mindflow.framework.rpc.server;
+package com.mindflow.framework.rpc.core;
 
 import com.google.common.collect.Maps;
-import com.mindflow.framework.rpc.core.DefaultRequest;
-import com.mindflow.framework.rpc.core.DefaultResponse;
 import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 
 import java.lang.reflect.InvocationTargetException;

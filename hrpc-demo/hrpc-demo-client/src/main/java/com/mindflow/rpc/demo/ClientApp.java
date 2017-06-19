@@ -1,12 +1,14 @@
 package com.mindflow.rpc.demo;
 
-import com.mindflow.framework.rpc.client.RpcClient;
 import com.mindflow.rpc.demo.model.User;
 import com.mindflow.rpc.demo.service.DemoService;
+import com.mindflow.rpc.demo.service.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Hello world!
@@ -18,14 +20,24 @@ public class ClientApp {
 
         ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:rpc-consumer.xml");
 
-        RpcClient rpcClient = (RpcClient) ctx.getBean("rpcClient");
-
-        DemoService service = rpcClient.create(DemoService.class);
+        DemoService service = (DemoService) ctx.getBean("demoService");
 
         service.hello("rpc");
         System.out.println("echo:"+service.echo("rpc"));
 
-        List<User> users = service.getUsers(28);
+        List<String> hobbies = new ArrayList<>();
+        hobbies.add("NBA");
+        hobbies.add("读书");
+        Map<String, String> map = service.introduce("hh", hobbies);
+        System.out.println("map:"+map);
+
+        System.out.println("*****************************");
+
+        UserService userService = (UserService) ctx.getBean("userService");
+        System.out.println(userService.insert(new User()));
+
+        List<User> users = userService.getUsers(28);
         System.out.println("users:"+users);
+
     }
 }

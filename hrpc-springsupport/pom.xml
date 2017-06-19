@@ -7,10 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hrpc-core</artifactId>
+    <artifactId>hrpc-springsupport</artifactId>
     <packaging>jar</packaging>
 
-    <name>hrpc-core</name>
+    <name>hrpc-springsupport</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -18,24 +18,17 @@
     </properties>
 
     <dependencies>
-        <!--netty-->
+        <!-- Spring -->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.objenesis</groupId>
-            <artifactId>objenesis</artifactId>
-            <version>${objenesis.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${springframework.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <groupId>com.mindflow</groupId>
+            <artifactId>hrpc-core</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 </project>

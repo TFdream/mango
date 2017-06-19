@@ -15,6 +15,7 @@
     <module>hrpc-core</module>
     <module>hrpc-registry</module>
     <module>hrpc-serializer</module>
+    <module>hrpc-springsupport</module>
     <module>hrpc-demo</module>
   </modules>
 

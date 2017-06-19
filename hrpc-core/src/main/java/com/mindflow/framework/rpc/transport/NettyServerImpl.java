@@ -6,7 +6,7 @@ import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.DefaultResponse;
 import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
 import com.mindflow.framework.rpc.exception.RpcFrameworkException;
-import com.mindflow.framework.rpc.server.MessageHandler;
+import com.mindflow.framework.rpc.core.MessageHandler;
 import com.mindflow.framework.rpc.util.Constants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;

@@ -3,8 +3,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:hrpc="http://code.mindflow.com/schema/hrpc"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.mindflow.com/schema/hrpc http://code.mindflow.com/schema/hrpc/hrpc.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
@@ -13,15 +15,12 @@
 
     <context:property-placeholder location="classpath:config.properties"/>
 
-    <!-- 服务注册配置 -->
-    <bean id="registryConfig" class="com.mindflow.framework.rpc.config.RegistryConfig">
-        <property name="protocol" value="${registry.protocol}"/>
-        <property name="address" value="${registry.address}"/>
-    </bean>
+    <hrpc:protocol name="hrpc" port="21918"/>
 
-    <!-- 配置 RPC 客户端 -->
-    <bean id="rpcClient" class="com.mindflow.framework.rpc.client.RpcClient">
-        <property name="registryConfig" ref="registryConfig" />
-    </bean>
+    <hrpc:registry protocol="${registry.protocol}" address="${registry.address}" timeout="5000" />
+
+    <!--引用服务-->
+    <hrpc:reference id="demoService" interface="com.mindflow.rpc.demo.service.DemoService"/>
+    <hrpc:reference id="userService" interface="com.mindflow.rpc.demo.service.UserService"/>
 
 </beans>
