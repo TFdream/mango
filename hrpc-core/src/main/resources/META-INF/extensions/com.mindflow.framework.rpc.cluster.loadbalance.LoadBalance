@@ -1,0 +1,1 @@
+random=com.mindflow.framework.rpc.cluster.loadbalance.RandomLoadBalance
