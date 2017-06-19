@@ -5,12 +5,9 @@ import com.mindflow.framework.rpc.common.URLParamName;
 import com.mindflow.framework.rpc.config.ProtocolConfig;
 import com.mindflow.framework.rpc.config.ReferenceConfig;
 import com.mindflow.framework.rpc.config.RegistryConfig;
-import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
-import com.mindflow.framework.rpc.proxy.ClientInvocationHandler;
 import com.mindflow.framework.rpc.proxy.ProxyFactory;
+import com.mindflow.framework.rpc.proxy.RpcInvoker;
 import com.mindflow.framework.rpc.proxy.jdk.JdkProxyFactory;
-import com.mindflow.framework.rpc.registry.RegistryFactory;
-import com.mindflow.framework.rpc.util.Constants;
 import com.mindflow.framework.rpc.util.HRpcUtils;
 import com.mindflow.framework.rpc.util.NetUtils;
 import com.mindflow.framework.rpc.util.StringUtils;
@@ -33,6 +30,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
     private transient BeanFactory beanFactory;
     private transient volatile boolean initialized;
     private ProxyFactory proxyFactory  = new JdkProxyFactory();
+    private RpcInvoker invoker;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -75,19 +73,20 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
         }
 
         RegistryConfig registryConfig = registries.get(0);
+        ProtocolConfig protocolConfig = protocols.get(0);
 
         InetAddress localAddress = NetUtils.getLocalAddress();
         URL url = new URL(URLParamName.codec.getValue(), localAddress.getHostAddress(), 0, interfaceClass.getName());
-        url.addParameter(Constants.REGISTRY_PROTOCOL, registryConfig.getProtocol());
-        url.addParameter(Constants.REGISTRY_ADDRESS, registryConfig.getAddress());
+        url.addParameter(URLParamName.registryProtocol.getName(), registryConfig.getProtocol());
+        url.addParameter(URLParamName.registryAddress.getName(), registryConfig.getAddress());
+        url.addParameter(URLParamName.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParamName.serialization.getValue());
         url.addParameter(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
         url.addParameter(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
-        url.addParameter(Constants.SIDE, "consumer");
-        url.addParameter(Constants.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+        url.addParameter(URLParamName.side.getName(), "consumer");
+        url.addParameter(URLParamName.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
 
-        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(registryConfig.getProtocol());
-        ClientInvocationHandler handler = new ClientInvocationHandler(url, registryFactory, timeout);
-        return (T) proxyFactory.getProxy(interfaceClass, handler);
+        invoker = new RpcInvoker(url, timeout);
+        return (T) proxyFactory.getProxy(interfaceClass, invoker);
     }
 
     @Override
@@ -160,7 +159,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements Factor
 
     @Override
     public void destroy() throws Exception {
-
+        invoker.close();
     }
 
 }

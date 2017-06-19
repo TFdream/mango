@@ -1,9 +1,9 @@
 package com.mindflow.framework.rpc.codec;
 
-import com.mindflow.framework.rpc.common.URLParamName;
 import com.mindflow.framework.rpc.core.extension.SPI;
 import com.mindflow.framework.rpc.util.Constants;
 import io.netty.channel.Channel;
+
 import java.io.IOException;
 
 /**

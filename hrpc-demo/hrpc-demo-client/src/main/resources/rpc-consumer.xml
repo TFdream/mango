@@ -13,7 +13,7 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.mindflow.rpc.demo"/>
 
-    <hrpc:protocol name="hrpc" port="21918"/>
+    <hrpc:protocol name="hrpc" port="21918" serialization="hessian"/>
 
     <hrpc:registry protocol="zookeeper" address="127.0.0.1:2181" timeout="5000" />
 

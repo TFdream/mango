@@ -1,7 +1,9 @@
 package com.mindflow.framework.rpc.proxy;
 
 import com.mindflow.framework.rpc.cluster.loadbalance.LoadBalance;
+import com.mindflow.framework.rpc.common.Closeable;
 import com.mindflow.framework.rpc.common.URL;
+import com.mindflow.framework.rpc.common.URLParamName;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.Response;
@@ -21,25 +23,22 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
 
-
 /**
  * ${DESCRIPTION}
  *
  * @author Ricky Fung
  */
-public class ClientInvocationHandler implements InvocationHandler, NotifyListener {
+public class RpcInvoker implements InvocationHandler, NotifyListener, Closeable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private NettyClient nettyClient;
-    private RegistryFactory registryFactory;
     private long timeoutInMillis;
     private URL url;
     private List<URL> urls;
     private LoadBalance loadBalanceStrategy;
 
-    public ClientInvocationHandler(URL url, RegistryFactory registryFactory, long timeoutInMillis) {
+    public RpcInvoker(URL url, long timeoutInMillis) {
         this.url = url;
-        this.registryFactory = registryFactory;
         this.timeoutInMillis = timeoutInMillis;
 
         init();
@@ -86,17 +85,22 @@ public class ClientInvocationHandler implements InvocationHandler, NotifyListene
     }
 
     private void init() {
+
+        String regProtocol = url.getParameter(URLParamName.registryProtocol.getName());
+        String regAddress = url.getParameter(URLParamName.registryAddress.getName());
+        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(regProtocol);
         this.loadBalanceStrategy = ExtensionLoader.getExtensionLoader(LoadBalance.class).getDefaultExtension();
         try {
-            Registry registry = this.registryFactory.getRegistry(url);
+            Registry registry = registryFactory.getRegistry(url);
             this.urls = registry.discover(url);
             if(this.urls==null || this.urls.isEmpty()) {
                 throw new IllegalStateException("no provider for url:"+url);
             }
-            //
+
+            //订阅服务
             registry.subscribe(url, this);
         } catch (Exception e) {
-            throw new RuntimeException("init error", e);
+            throw new RpcFrameworkException("Unable discover/subscribe service:"+url.getPath() + " from ["+regProtocol+":"+regAddress+"]", e);
         }
 
         nettyClient = new NettyClientImpl(new NettyClientConfig());
@@ -106,5 +110,10 @@ public class ClientInvocationHandler implements InvocationHandler, NotifyListene
     @Override
     public void notify(URL registryUrl, List<URL> urls) {
         logger.info("client notify from %s", registryUrl);
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

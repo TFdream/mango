@@ -8,6 +8,7 @@ import com.mindflow.framework.rpc.config.RegistryConfig;
 import com.mindflow.framework.rpc.config.ServiceConfig;
 import com.mindflow.framework.rpc.core.MessageHandler;
 import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
+import com.mindflow.framework.rpc.exception.RpcFrameworkException;
 import com.mindflow.framework.rpc.registry.RegistryFactory;
 import com.mindflow.framework.rpc.transport.NettyServer;
 import com.mindflow.framework.rpc.transport.NettyServerImpl;
@@ -67,7 +68,8 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
             try {
                 registryFactory.getRegistry(url).register(url);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RpcFrameworkException("Unable register url:"+url
+                        +" to ["+registryConfig.getProtocol()+":"+registryConfig.getAddress()+"]", e);
             }
         }
 
@@ -106,10 +108,10 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
                 url.addParameter(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
                 url.addParameter(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
                 url.addParameter(URLParamName.serialization.getName(), StringUtils.isNotEmpty(serializer) ? serializer: URLParamName.serialization.getValue());
-                url.addParameter(Constants.REGISTRY_PROTOCOL, registryConfig.getProtocol());
-                url.addParameter(Constants.REGISTRY_ADDRESS, registryConfig.getAddress());
-                url.addParameter(Constants.SIDE, "provider");
-                url.addParameter(Constants.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+                url.addParameter(URLParamName.registryProtocol.getName(), registryConfig.getProtocol());
+                url.addParameter(URLParamName.registryAddress.getName(), registryConfig.getAddress());
+                url.addParameter(URLParamName.side.getName(), "provider");
+                url.addParameter(URLParamName.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
                 urlList.add(url);
 
                 MessageHandler.getInstance().addServiceBean(interfaceName, ref);

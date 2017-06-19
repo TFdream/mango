@@ -34,7 +34,7 @@ public class RpcContext {
         return attribute.get(key);
     }
 
-    public void revomeAttribute(Object key){
+    public void removeAttribute(Object key){
         attribute.remove(key);
     }
 }

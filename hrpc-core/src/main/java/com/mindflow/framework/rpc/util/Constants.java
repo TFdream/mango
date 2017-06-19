@@ -32,14 +32,5 @@ public class Constants {
 
     public static final int DEFAULT_PORT = 21918;
 
-    //
-    public static final String REGISTRY_PROTOCOL = "reg_protocol";
-    public static final String REGISTRY_ADDRESS = "reg_address";
-
-    public static final String SERIALIZATION = "serializer";
-
-    public static final String SIDE = "side";
-    public static final String TIMESTAMP = "timestamp";
-
 
 }

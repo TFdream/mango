@@ -24,9 +24,15 @@ public enum URLParamName {
 
     retries("retries", 0),
 
-    /**zookeeper**/
+    /**Registry**/
+    registryProtocol("reg_protocol", "local"),
+    registryAddress("reg_address", "localhost"),
+
     registrySessionTimeout("registrySessionTimeout", 60*1000),
     registryConnectTimeout("registryConnectTimeout", 2000),
+
+    side("side", ""),
+    timestamp("timestamp", 0),
 
     /** serialize **/
     serialization("serializer", "protostuff"),
