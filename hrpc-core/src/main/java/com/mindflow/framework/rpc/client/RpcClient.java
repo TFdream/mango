@@ -41,9 +41,8 @@ public class RpcClient implements InitializingBean, DisposableBean {
 
         checkInit();
 
-        InetAddress local = NetUtils.getLocalAddress();
-        local.getHostAddress();
-        URL url = new URL(URLParamName.codec.getValue(), null, 0, interfaceClass.getName());
+        InetAddress localAddress = NetUtils.getLocalAddress();
+        URL url = new URL(URLParamName.codec.getValue(), localAddress.getHostAddress(), 0, interfaceClass.getName());
         url.addParameter(Constants.REGISTRY_PROTOCOL, this.registryConfig.getProtocol());
         url.addParameter(Constants.REGISTRY_ADDRESS, this.registryConfig.getAddress());
         url.addParameter(Constants.SIDE, "consumer");

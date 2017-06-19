@@ -8,10 +8,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hrpc-demo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>hrpc-demo</name>
     <url>http://maven.apache.org</url>
+
+    <modules>
+        <module>hrpc-demo-api</module>
+		<module>hrpc-demo-client</module>
+		<module>hrpc-demo-server</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,24 +45,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${springframework.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mindflow</groupId>
-            <artifactId>hrpc-core</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mindflow</groupId>
-            <artifactId>hrpc-registry-zk</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mindflow</groupId>
-            <artifactId>hrpc-serializer-protostuff</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <!--exclude Spring Framework commons-logging dependency-->

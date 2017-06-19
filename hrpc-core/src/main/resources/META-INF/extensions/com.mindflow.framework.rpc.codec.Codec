@@ -1,1 +1,1 @@
-default=com.mindflow.framework.rpc.codec.DefaultCodec
+hrpc=com.mindflow.framework.rpc.codec.DefaultCodec

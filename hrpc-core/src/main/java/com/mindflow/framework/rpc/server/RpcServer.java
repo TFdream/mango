@@ -11,6 +11,8 @@ import com.mindflow.framework.rpc.registry.RegistryFactory;
 import com.mindflow.framework.rpc.transport.NettyServer;
 import com.mindflow.framework.rpc.transport.NettyServerImpl;
 import com.mindflow.framework.rpc.util.Constants;
+import com.mindflow.framework.rpc.util.NetUtils;
+import com.mindflow.framework.rpc.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -33,7 +35,8 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
 
     private RegistryConfig registryConfig;
     private String protocol;
-    private String serverAddress;   //ip:port
+    private String host;
+    private int port;
     private NettyServer nettyServer;
     private transient ApplicationContext ctx;
     private final List<URL> urls = new ArrayList<>();
@@ -43,18 +46,6 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
         this.ctx = ctx;
     }
 
-    public void setRegistryConfig(RegistryConfig registryConfig) {
-        this.registryConfig = registryConfig;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    public void setServerAddress(String serverAddress) {
-        this.serverAddress = serverAddress;
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
         this.start();
@@ -62,14 +53,19 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
 
     private void start() throws InterruptedException {
 
-        Preconditions.checkNotNull(this.serverAddress);
         Preconditions.checkNotNull(this.registryConfig);
         Preconditions.checkNotNull(this.registryConfig.getProtocol());
         Preconditions.checkNotNull(this.registryConfig.getAddress());
 
-        String[] arr = this.serverAddress.split(":");
-        String host = arr[0];
-        int port = Integer.parseInt(arr[1]);
+        if(StringUtils.isEmpty(protocol)) {
+            this.protocol = URLParamName.codec.getValue();
+        }
+        if(StringUtils.isEmpty(host)) {
+            this.host = NetUtils.getLocalAddress().getHostAddress();
+        }
+        if(port<=0) {
+            port = Constants.DEFAULT_PORT;
+        }
 
         Map<String, Object> serviceBeanMap = ctx.getBeansWithAnnotation(RpcService.class);
         if (serviceBeanMap!=null && serviceBeanMap.size()>0) {
@@ -84,7 +80,7 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
                 String version = rpcService.version();
                 String group = rpcService.version();
 
-                URL url = new URL(URLParamName.codec.getValue(), host, port, interfaceName);
+                URL url = new URL(protocol, host, port, interfaceName);
                 url.addParameter(URLParamName.version.getName(), version);
                 url.addParameter(URLParamName.group.getName(), group!=null ? group : URLParamName.group.getValue());
                 url.addParameter(URLParamName.serializer.getName(), URLParamName.serializer.getValue());
@@ -120,4 +116,19 @@ public class RpcServer implements ApplicationContextAware, InitializingBean, Dis
         nettyServer.shutdown();
     }
 
+    public void setRegistryConfig(RegistryConfig registryConfig) {
+        this.registryConfig = registryConfig;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 }

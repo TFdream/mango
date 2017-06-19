@@ -1,16 +1,21 @@
 package com.mindflow.framework.rpc.proxy;
 
+import com.mindflow.framework.rpc.cluster.loadbalance.LoadBalance;
 import com.mindflow.framework.rpc.common.URL;
 import com.mindflow.framework.rpc.config.NettyClientConfig;
 import com.mindflow.framework.rpc.core.DefaultRequest;
 import com.mindflow.framework.rpc.core.Response;
+import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
 import com.mindflow.framework.rpc.exception.RpcFrameworkException;
+import com.mindflow.framework.rpc.registry.NotifyListener;
 import com.mindflow.framework.rpc.registry.Registry;
 import com.mindflow.framework.rpc.registry.RegistryFactory;
 import com.mindflow.framework.rpc.transport.NettyClient;
 import com.mindflow.framework.rpc.transport.NettyClientImpl;
 import com.mindflow.framework.rpc.util.Constants;
 import com.mindflow.framework.rpc.util.RequestIdGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -21,20 +26,26 @@ import java.util.List;
  *
  * @author Ricky Fung
  */
-public class ClientInvocationHandler implements InvocationHandler {
+public class ClientInvocationHandler implements InvocationHandler, NotifyListener {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private NettyClient nettyClient;
     private RegistryFactory registryFactory;
     private long timeoutInMillis;
     private URL url;
     private List<URL> urls;
+    private LoadBalance loadBalanceStrategy;
 
     public ClientInvocationHandler(URL url, RegistryFactory registryFactory, long timeoutInMillis) {
         this.url = url;
         this.registryFactory = registryFactory;
         this.timeoutInMillis = timeoutInMillis;
-
+        this.loadBalanceStrategy = ExtensionLoader.getExtensionLoader(LoadBalance.class).getDefaultExtension();
         try {
-            this.urls = registryFactory.getRegistry(url).discover(url);
+            Registry registry = this.registryFactory.getRegistry(url);
+            this.urls = registry.discover(url);
+            //
+            registry.subscribe(url, this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,11 +75,13 @@ public class ClientInvocationHandler implements InvocationHandler {
 
         try {
             //load-balance
-
-            Response resp = nettyClient.invokeSync("127.0.0.1:21918", request, timeoutInMillis);
+            URL url = loadBalanceStrategy.select(urls);
+            String address = String.format("%s:%d", url.getHost(), url.getPort());
+            logger.info("LB select: {}", address);
+            Response resp = nettyClient.invokeSync(address, request, timeoutInMillis);
             return getValue(resp);
         } catch (RuntimeException e) {
-            throw new RpcFrameworkException("", e);
+            throw new RpcFrameworkException("invoke exception", e);
         }
     }
 
@@ -79,5 +92,10 @@ public class ClientInvocationHandler implements InvocationHandler {
                     exception.getMessage(), exception);
         }
         return resp.getResult();
+    }
+
+    @Override
+    public void notify(URL registryUrl, List<URL> urls) {
+        logger.info("client notify from %s", registryUrl);
     }
 }

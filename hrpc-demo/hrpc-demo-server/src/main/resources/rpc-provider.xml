@@ -22,7 +22,6 @@
     <!-- 配置 RPC 服务器 -->
     <bean id="rpcServer" class="com.mindflow.framework.rpc.server.RpcServer">
         <property name="protocol" value="" />
-        <property name="serverAddress" value="127.0.0.1:21918" />
         <property name="registryConfig" ref="registryConfig" />
     </bean>
 

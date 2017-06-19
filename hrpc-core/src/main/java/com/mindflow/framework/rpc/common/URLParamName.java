@@ -1,5 +1,7 @@
 package com.mindflow.framework.rpc.common;
 
+import com.mindflow.framework.rpc.util.Constants;
+
 /**
  * ${DESCRIPTION}
  *
@@ -28,7 +30,7 @@ public enum URLParamName {
     /** serialize **/
     serializer("serializer", "protostuff"),
     /** codec **/
-    codec("codec", "hrpc");
+    codec("codec", Constants.FRAMEWORK_NAME);
 
     private String name;
     private String value;

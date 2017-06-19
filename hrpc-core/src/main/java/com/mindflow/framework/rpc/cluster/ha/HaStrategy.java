@@ -1,6 +1,6 @@
 package com.mindflow.framework.rpc.cluster.ha;
 
-import com.mindflow.framework.rpc.cluster.LoadBalanceStrategy;
+import com.mindflow.framework.rpc.cluster.loadbalance.LoadBalance;
 import com.mindflow.framework.rpc.core.Request;
 import com.mindflow.framework.rpc.core.Response;
 
@@ -11,5 +11,5 @@ import com.mindflow.framework.rpc.core.Response;
  */
 public interface HaStrategy {
 
-    Response call(Request request, LoadBalanceStrategy loadBalance);
+    Response call(Request request, LoadBalance loadBalance);
 }

@@ -53,7 +53,6 @@ public class NettyServerImpl implements NettyServer {
         this.serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, config.getBacklogSize())
-                .option(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.SO_RCVBUF, config.getReceivedBufferSize())
                 .childOption(ChannelOption.SO_SNDBUF, config.getSendBufferSize())
