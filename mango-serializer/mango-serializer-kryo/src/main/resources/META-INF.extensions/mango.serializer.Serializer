@@ -1,0 +1,1 @@
+kryo=mango.serializer.kryo.KryoSerializer

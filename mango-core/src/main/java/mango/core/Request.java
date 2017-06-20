@@ -11,7 +11,7 @@ public interface Request {
 
     Long getRequestId();
 
-    String getClassName();
+    String getInterfaceName();
 
     String getMethodName();
 

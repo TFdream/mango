@@ -2,9 +2,9 @@ package mango.config;
 
 import mango.common.URL;
 import mango.common.URLParam;
+import mango.core.extension.ExtensionLoader;
 import mango.proxy.ProxyFactory;
 import mango.rpc.RpcInvoker;
-import mango.proxy.jdk.JdkProxyFactory;
 import mango.util.Constants;
 import mango.util.NetUtils;
 import mango.util.StringUtils;
@@ -22,7 +22,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     protected transient volatile T proxy;
 
     private transient volatile boolean initialized;
-    private ProxyFactory proxyFactory  = new JdkProxyFactory();
+    private ProxyFactory proxyFactory  = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getDefaultExtension();
     private RpcInvoker invoker;
 
     public T get() {

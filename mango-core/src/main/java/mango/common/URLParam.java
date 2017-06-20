@@ -29,6 +29,8 @@ public enum URLParam {
 
     retries("retries", 0),
 
+    proxyType("proxy", "jdk"),
+
     /**Registry**/
     registryProtocol("reg_protocol", "local"),
     registryAddress("reg_address", "localhost"),

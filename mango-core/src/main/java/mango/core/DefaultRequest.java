@@ -15,7 +15,7 @@ public class DefaultRequest implements Serializable, Request {
     private static final long serialVersionUID = 7478520607109127572L;
 
     private Long requestId;
-    private String className;
+    private String interfaceName;
     private String methodName;
     private Object[] arguments;
     private Class<?>[] parameterTypes;
@@ -32,12 +32,12 @@ public class DefaultRequest implements Serializable, Request {
     }
 
     @Override
-    public String getClassName() {
-        return className;
+    public String getInterfaceName() {
+        return interfaceName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
     }
 
     @Override

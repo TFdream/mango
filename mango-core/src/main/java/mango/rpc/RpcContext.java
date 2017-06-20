@@ -1,4 +1,7 @@
-package mango.core;
+package mango.rpc;
+
+import mango.core.Request;
+import mango.core.Response;
 
 import java.util.HashMap;
 import java.util.Map;

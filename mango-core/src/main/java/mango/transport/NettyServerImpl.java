@@ -1,13 +1,5 @@
 package mango.transport;
 
-import mango.codec.Codec;
-import mango.config.NettyServerConfig;
-import mango.core.DefaultRequest;
-import mango.core.DefaultResponse;
-import mango.core.extension.ExtensionLoader;
-import mango.exception.RpcFrameworkException;
-import mango.rpc.MessageHandler;
-import mango.util.Constants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,6 +8,14 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import mango.codec.Codec;
+import mango.config.NettyServerConfig;
+import mango.core.DefaultRequest;
+import mango.core.DefaultResponse;
+import mango.core.extension.ExtensionLoader;
+import mango.exception.RpcFrameworkException;
+import mango.rpc.MessageRouter;
+import mango.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +40,13 @@ public class NettyServerImpl implements NettyServer {
 
     private ThreadPoolExecutor pool;    //业务处理线程池
     private Codec codec;
-
+    private MessageRouter messageRouter;
     private NettyServerConfig config;
 
     public NettyServerImpl(NettyServerConfig config){
         this.config = config;
         codec = ExtensionLoader.getExtensionLoader(Codec.class).getDefaultExtension();
+        this.messageRouter = ExtensionLoader.getExtensionLoader(MessageRouter.class).getDefaultExtension();
     }
 
     @Override
@@ -137,8 +138,8 @@ public class NettyServerImpl implements NettyServer {
 
     private void processRpcRequest(ChannelHandlerContext context, DefaultRequest request, long processStartTime) {
 
-        DefaultResponse response = MessageHandler.getInstance().invoke(request, processStartTime);
-
+        DefaultResponse response = (DefaultResponse) this.messageRouter.handle(request);//;
+        response.setProcessTime(System.currentTimeMillis() - processStartTime);
         if(request.getType()!=Constants.REQUEST_ONEWAY){    //非单向调用
             context.writeAndFlush(response);
         }
