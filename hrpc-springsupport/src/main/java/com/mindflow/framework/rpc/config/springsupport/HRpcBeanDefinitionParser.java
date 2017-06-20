@@ -84,17 +84,19 @@ public class HRpcBeanDefinitionParser implements BeanDefinitionParser {
             parseCommonProperty("max-pool-size", "maxPoolSize", element, bd, parserContext);
             parseCommonProperty("charset", null, element, bd, parserContext);
             parseCommonProperty("buffer-size", "bufferSize", element, bd, parserContext);
-
+            parseCommonProperty("payload", null, element, bd, parserContext);
+            parseCommonProperty("heartbeat", null, element, bd, parserContext);
+            parseCommonProperty("default", "isDefault", element, bd, parserContext);
         } else if (RegistryConfig.class.equals(beanClass)) {
             HRpcNamespaceHandler.registryDefineNames.add(id);
 
             parseCommonProperty("protocol", null, element, bd, parserContext);
             parseCommonProperty("address", null, element, bd, parserContext);
-            parseCommonProperty("timeout", null, element, bd, parserContext);
+            parseCommonProperty("connect-timeout", "connectTimeout", element, bd, parserContext);
             parseCommonProperty("session-timeout", "sessionTimeout", element, bd, parserContext);
             parseCommonProperty("username", null, element, bd, parserContext);
             parseCommonProperty("password", null, element, bd, parserContext);
-
+            parseCommonProperty("default", "isDefault", element, bd, parserContext);
         } else if (ReferenceConfigBean.class.equals(beanClass)) {
             HRpcNamespaceHandler.referenceConfigDefineNames.add(id);
 
@@ -145,9 +147,9 @@ public class HRpcBeanDefinitionParser implements BeanDefinitionParser {
 
             String property = alias!=null ? alias:name;
 
-            if("port".equals(name) || "buffer-size".equals(name)
+            if("port".equals(name) || "buffer-size".equals(name) || "payload".equals(name) || "heartbeat".equals(name)
                     || "min-pool-size".equals(name) || "max-pool-size".equals(name)
-                    || "timeout".equals(name)|| "session-timeout".equals(name)|| "payload".equals(name)
+                    || "timeout".equals(name)|| "session-timeout".equals(name)|| "connect-timeout".equals(name)
                     || "retries".equals(name)){
 
                 bd.getPropertyValues().addPropertyValue(property, Integer.parseInt(value));

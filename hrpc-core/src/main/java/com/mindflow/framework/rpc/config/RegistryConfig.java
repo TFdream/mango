@@ -16,8 +16,8 @@ public class RegistryConfig implements Serializable {
     private String username;
     private String password;
 
-    private Integer timeout;
     private Integer sessionTimeout;
+    private Integer connectTimeout;
 
     private Boolean isDefault = Boolean.TRUE;
 
@@ -61,12 +61,12 @@ public class RegistryConfig implements Serializable {
         this.password = password;
     }
 
-    public Integer getTimeout() {
-        return timeout;
+    public Integer getConnectTimeout() {
+        return connectTimeout;
     }
 
-    public void setTimeout(Integer timeout) {
-        this.timeout = timeout;
+    public void setConnectTimeout(Integer connectTimeout) {
+        this.connectTimeout = connectTimeout;
     }
 
     public Integer getSessionTimeout() {

@@ -23,7 +23,9 @@ public class ProtocolConfig implements Serializable {
     private Integer maxPoolSize;
 
     private String charset;
-    private Integer bufferSize;
+    private Integer bufferSize; //网络读写缓冲区大小
+    private Integer payload;    //请求及响应数据包大小限制，单位：字节
+    private Integer heartbeat;  //心跳间隔
 
     private Boolean isDefault = Boolean.TRUE;
 
@@ -113,6 +115,22 @@ public class ProtocolConfig implements Serializable {
 
     public void setBufferSize(Integer bufferSize) {
         this.bufferSize = bufferSize;
+    }
+
+    public Integer getPayload() {
+        return payload;
+    }
+
+    public void setPayload(Integer payload) {
+        this.payload = payload;
+    }
+
+    public Integer getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(Integer heartbeat) {
+        this.heartbeat = heartbeat;
     }
 
     public Boolean isDefault() {

@@ -15,7 +15,7 @@
 
     <hrpc:protocol name="hrpc" port="21918"/>
 
-    <hrpc:registry protocol="zookeeper" address="127.0.0.1:2181" timeout="5000" />
+    <hrpc:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="2000" session-timeout="60000" />
 
     <!-- -->
     <bean id="rpcServer" class="com.mindflow.framework.rpc.config.springsupport.RpcServer" />

@@ -28,14 +28,14 @@ public enum URLParamName {
     registryProtocol("reg_protocol", "local"),
     registryAddress("reg_address", "localhost"),
 
-    registrySessionTimeout("registrySessionTimeout", 60*1000),
-    registryConnectTimeout("registryConnectTimeout", 2000),
+    registrySessionTimeout("reg_session_timeout", 60*1000),
+    registryConnectTimeout("reg_connect_timeout", 2000),
 
     side("side", ""),
     timestamp("timestamp", 0),
 
     /** serialize **/
-    serialization("serializer", "protostuff"),
+    serialization("serialization", "protostuff"),
     /** codec **/
     codec("codec", Constants.FRAMEWORK_NAME);
 
