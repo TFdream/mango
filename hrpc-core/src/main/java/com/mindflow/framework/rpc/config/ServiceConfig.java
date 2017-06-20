@@ -6,11 +6,14 @@ import com.mindflow.framework.rpc.core.extension.ExtensionLoader;
 import com.mindflow.framework.rpc.exporter.Exporter;
 import com.mindflow.framework.rpc.exporter.ExporterHandler;
 import com.mindflow.framework.rpc.util.Constants;
+import com.mindflow.framework.rpc.util.NetUtils;
 import com.mindflow.framework.rpc.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -25,6 +28,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
     private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
     private Class<T> interfaceClass;
     private T ref;
+    private String host;
 
     protected synchronized void export() {
         if (exported) {
@@ -67,16 +71,23 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
             protocolName = URLParamName.protocol.getValue();
         }
 
-        URL url = new URL(protocolName, protocol.getHost(), protocol.getPort(), interfaceName);
-        url.addParameter(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
-        url.addParameter(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
-        url.addParameter(URLParamName.serialization.getName(), StringUtils.isNotEmpty(protocol.getSerialization()) ? protocol.getSerialization(): URLParamName.serialization.getValue());
-        url.addParameter(URLParamName.requestTimeout.getName(), timeout!=null ? timeout.toString() : URLParamName.requestTimeout.getValue());
-        url.addParameter(URLParamName.side.getName(), "provider");
-        url.addParameter(URLParamName.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+        String hostAddress = host;
+        if (StringUtils.isBlank(hostAddress)) {
+            hostAddress = NetUtils.getLocalAddress().getHostAddress();
+        }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(URLParamName.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParamName.version.getValue());
+        map.put(URLParamName.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParamName.group.getValue());
+        map.put(URLParamName.serialization.getName(), StringUtils.isNotEmpty(protocol.getSerialization()) ? protocol.getSerialization(): URLParamName.serialization.getValue());
+        map.put(URLParamName.requestTimeout.getName(), timeout!=null ? timeout.toString() : URLParamName.requestTimeout.getValue());
+        map.put(URLParamName.side.getName(), "provider");
+        map.put(URLParamName.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+
+        URL serviceUrl = new URL(protocolName, hostAddress, protocol.getPort(), interfaceClass.getName(), map);
 
         ExporterHandler exporterHandler = ExtensionLoader.getExtensionLoader(ExporterHandler.class).getExtension(Constants.DEFAULT_VALUE);
-        exporters.add(exporterHandler.export(interfaceClass, ref, url, registryUrls));
+        exporters.add(exporterHandler.export(interfaceClass, ref, serviceUrl, registryUrls));
     }
 
     public T getRef() {
@@ -85,6 +96,14 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
     public void setRef(T ref) {
         this.ref = ref;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public Class<T> getInterfaceClass() {
