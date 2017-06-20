@@ -16,7 +16,7 @@ public class HRpcUtils {
      */
     public static RegistryConfig getDefaultRegistryConfig(){
         RegistryConfig local = new RegistryConfig();
-        local.setProtocol("local");
+        local.setProtocol(Constants.REGISTRY_PROTOCOL_LOCAL);
         return local;
     }
 
@@ -24,6 +24,8 @@ public class HRpcUtils {
         ProtocolConfig pc = new ProtocolConfig();
         pc.setId(Constants.FRAMEWORK_NAME);
         pc.setName(Constants.FRAMEWORK_NAME);
+        pc.setHost(NetUtils.getLocalAddress().getHostAddress());
+        pc.setPort(Constants.DEFAULT_PORT);
         return pc;
     }
 

@@ -1,7 +1,13 @@
 package com.mindflow.framework.rpc.config;
 
-import java.util.Collections;
-import java.util.List;
+import com.mindflow.framework.rpc.common.URL;
+import com.mindflow.framework.rpc.common.URLParamName;
+import com.mindflow.framework.rpc.registry.Registry;
+import com.mindflow.framework.rpc.util.Constants;
+import com.mindflow.framework.rpc.util.NetUtils;
+import com.mindflow.framework.rpc.util.StringUtils;
+
+import java.util.*;
 
 /**
  * ${DESCRIPTION}
@@ -11,7 +17,6 @@ import java.util.List;
 public class AbstractInterfaceConfig {
     private String id;
     protected String interfaceName;
-    protected Class<?> interfaceClass;
     protected String group;
     protected String version;
     protected Integer timeout;
@@ -21,6 +26,32 @@ public class AbstractInterfaceConfig {
     protected List<ProtocolConfig> protocols;
     // 注册中心的配置列表
     protected List<RegistryConfig> registries;
+
+    protected List<URL> loadRegistryUrls() {
+        List<URL> registryList = new ArrayList<URL>();
+        if (registries != null && !registries.isEmpty()) {
+            for (RegistryConfig config : registries) {
+                String address = config.getAddress();
+                String protocol = config.getProtocol();
+                if (StringUtils.isBlank(address)) {
+                    address = NetUtils.LOCALHOST + Constants.HOST_PORT_SEPARATOR + Constants.DEFAULT_INT_VALUE;
+                    protocol = Constants.REGISTRY_PROTOCOL_LOCAL;
+                }
+                Map<String, String> map = new HashMap<>();
+
+                map.put(URLParamName.path.getName(), Registry.class.getName());
+                map.put(URLParamName.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+                map.put(URLParamName.protocol.getName(), protocol);
+                map.put(URLParamName.registryConnectTimeout.getName(), String.valueOf(config.getConnectTimeout()));
+                map.put(URLParamName.registrySessionTimeout.getName(), String.valueOf(config.getSessionTimeout()));
+
+                String[] arr = address.split(Constants.HOST_PORT_SEPARATOR);
+                URL url = new URL(protocol, arr[0], Integer.parseInt(arr[1]), Registry.class.getName(), map);
+                registryList.add(url);
+            }
+        }
+        return registryList;
+    }
 
     public String getId() {
         return id;
@@ -36,14 +67,6 @@ public class AbstractInterfaceConfig {
 
     public void setInterfaceName(String interfaceName) {
         this.interfaceName = interfaceName;
-    }
-
-    public Class<?> getInterfaceClass() {
-        return interfaceClass;
-    }
-
-    public void setInterfaceClass(Class<?> interfaceClass) {
-        this.interfaceClass = interfaceClass;
     }
 
     public String getGroup() {

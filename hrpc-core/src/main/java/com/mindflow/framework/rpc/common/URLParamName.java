@@ -13,8 +13,13 @@ public enum URLParamName {
     /** group **/
     group("group", "default_rpc"),
 
+    protocol("protocol", Constants.FRAMEWORK_NAME),
+    path("path", ""),
+    host("host", ""),
+    port("port", 0),
+
     /** request timeout **/
-    requestTimeout("requestTimeout", 500),
+    requestTimeout("timeout", 500),
     /** connect timeout **/
     connectTimeout("connectTimeout", 1000),
     /** service min worker threads **/

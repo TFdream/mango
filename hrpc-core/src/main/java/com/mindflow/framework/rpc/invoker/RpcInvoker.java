@@ -1,4 +1,4 @@
-package com.mindflow.framework.rpc.proxy;
+package com.mindflow.framework.rpc.invoker;
 
 import com.mindflow.framework.rpc.cluster.loadbalance.LoadBalance;
 import com.mindflow.framework.rpc.common.Closeable;

@@ -32,5 +32,11 @@ public class Constants {
 
     public static final int DEFAULT_PORT = 21918;
 
+    public static final int DEFAULT_INT_VALUE = 0;
 
+    public static final String REGISTRY_PROTOCOL_LOCAL = "local";
+
+    public static final String HOST_PORT_SEPARATOR = ":";
+
+    public static final String DEFAULT_VALUE = "default";
 }

@@ -1,25 +1,29 @@
 package com.mindflow.framework.rpc.config.springsupport;
 
-import com.mindflow.framework.rpc.common.URLParamName;
 import com.mindflow.framework.rpc.config.ProtocolConfig;
-import com.mindflow.framework.rpc.config.ReferenceConfig;
 import com.mindflow.framework.rpc.config.RegistryConfig;
+import com.mindflow.framework.rpc.config.ServiceConfig;
 import com.mindflow.framework.rpc.util.CollectionUtil;
 import com.mindflow.framework.rpc.util.HRpcUtils;
-import com.mindflow.framework.rpc.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * ${DESCRIPTION}
  *
  * @author Ricky Fung
  */
-public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements
-        FactoryBean<T>, BeanFactoryAware,
-        InitializingBean, DisposableBean {
+public class ServiceConfigBean<T> extends ServiceConfig<T> implements BeanFactoryAware,
+        InitializingBean,
+        ApplicationListener<ContextRefreshedEvent>,
+        DisposableBean {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -31,41 +35,18 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements
     }
 
     @Override
-    public T getObject() throws Exception {
-        return get();
-    }
-
-    @Override
-    public Class<?> getObjectType() {
-        return getInterfaceClass();
-    }
-
-    @Override
-    public boolean isSingleton() {
-        return true;
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+        if (!isExported()) {
+            export();
+        }
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        logger.debug("check reference interface:%s config", getInterfaceName());
-        //检查依赖的配置
-        checkProtocolConfig();
+        logger.debug("check service interface:%s config", getInterfaceName());
         checkRegistryConfig();
-
-        if(StringUtils.isEmpty(getGroup())) {
-            setGroup(URLParamName.group.getValue());
-        }
-        if(StringUtils.isEmpty(getVersion())) {
-            setVersion(URLParamName.version.getValue());
-        }
-
-        if(getTimeout()==null) {
-            setTimeout(URLParamName.requestTimeout.getIntValue());
-        }
-        if(getRetries()==null) {
-            setRetries(URLParamName.retries.getIntValue());
-        }
+        checkProtocolConfig();
     }
 
     @Override
