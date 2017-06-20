@@ -3,20 +3,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.mindflow</groupId>
-  <artifactId>hrpc</artifactId>
+  <artifactId>mango</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
-  <name>hrpc</name>
+  <name>mango</name>
   <url>http://maven.apache.org</url>
 
   <modules>
-    <module>hrpc-core</module>
-    <module>hrpc-registry</module>
-    <module>hrpc-serializer</module>
-    <module>hrpc-springsupport</module>
-    <module>hrpc-demo</module>
+    <module>mango-core</module>
+    <module>mango-registry</module>
+    <module>mango-serializer</module>
+    <module>mango-springsupport</module>
+    <module>mango-demo</module>
   </modules>
 
   <properties>

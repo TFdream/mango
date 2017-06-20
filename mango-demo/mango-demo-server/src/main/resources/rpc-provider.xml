@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mango="http://code.mindflow.com/schema/mango"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.mindflow.com/schema/mango http://code.mindflow.com/schema/mango/mango.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="mango.demo"/>
+
+    <mango:protocol name="mango" port="21918"/>
+
+    <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="2000" session-timeout="60000" />
+
+    <!--暴露服务 -->
+    <mango:service interface="mango.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />
+    <mango:service interface="mango.demo.service.UserService" ref="userService" version="1.0.0" />
+
+</beans>
