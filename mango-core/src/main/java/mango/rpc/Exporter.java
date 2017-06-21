@@ -1,17 +1,13 @@
 package mango.rpc;
 
-import mango.common.URL;
-
 /**
  * ${DESCRIPTION}
  *
  * @author Ricky Fung
  */
-public interface Exporter<T> {
-
-    URL getUrl();
+public interface Exporter<T> extends Node {
 
     Provider<T> getProvider();
 
-    void close();
+    void unExport();
 }

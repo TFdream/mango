@@ -2,7 +2,6 @@ package mango.config.springsupport;
 
 import mango.config.ProtocolConfig;
 import mango.config.RegistryConfig;
-import mango.config.ServiceConfig;
 import mango.util.StringUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -113,7 +112,7 @@ public class MangoBeanDefinitionParser implements BeanDefinitionParser {
             parseCommonProperty("timeout", null, element, bd, parserContext);
             parseCommonProperty("retries", null, element, bd, parserContext);
 
-        } else if (ServiceConfig.class.equals(beanClass)) {
+        } else if (ServiceConfigBean.class.equals(beanClass)) {
             MangoNamespaceHandler.serviceConfigDefineNames.add(id);
 
             parseCommonProperty("interface", "interfaceName", element, bd, parserContext);

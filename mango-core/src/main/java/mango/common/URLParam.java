@@ -27,6 +27,10 @@ public enum URLParam {
     /** service max worker threads **/
     maxWorkerThread("maxWorkerThread", 200),
 
+    /**netty**/
+    bufferSize("buffer_size", 1024*16),
+
+
     retries("retries", 0),
 
     proxyType("proxy", "jdk"),

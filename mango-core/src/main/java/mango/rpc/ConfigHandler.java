@@ -12,7 +12,7 @@ import java.util.List;
  * @author Ricky Fung
  */
 @SPI(Constants.DEFAULT_VALUE)
-public interface ExporterHandler {
+public interface ConfigHandler {
 
     <T> Exporter<T> export(Class<T> interfaceClass, T ref, URL serviceUrl, List<URL> registryUrls);
 

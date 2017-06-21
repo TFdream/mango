@@ -57,9 +57,12 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
 
         RegistryConfig registryConfig = registries.get(0);
         ProtocolConfig protocolConfig = protocols.get(0);
-
+        Integer port = protocolConfig.getPort();
+        if(port==null) {
+            port = Constants.DEFAULT_PORT;
+        }
         InetAddress localAddress = NetUtils.getLocalAddress();
-        URL url = new URL(URLParam.codec.getValue(), localAddress.getHostAddress(), 0, interfaceClass.getName());
+        URL url = new URL(URLParam.codec.getValue(), localAddress.getHostAddress(), port, interfaceClass.getName());
         url.addParameter(URLParam.registryProtocol.getName(), registryConfig.getProtocol());
         url.addParameter(URLParam.registryAddress.getName(), registryConfig.getAddress());
         url.addParameter(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParam.serialization.getValue());

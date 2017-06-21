@@ -1,18 +1,19 @@
 package mango.transport;
 
-import mango.codec.Codec;
-import mango.config.NettyClientConfig;
-import mango.core.*;
-import mango.core.extension.ExtensionLoader;
-import mango.exception.TransportException;
-import mango.util.Constants;
-import mango.util.NetUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import mango.codec.Codec;
+import mango.common.URL;
+import mango.common.URLParam;
+import mango.core.*;
+import mango.core.extension.ExtensionLoader;
+import mango.exception.TransportException;
+import mango.util.Constants;
+import mango.util.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +47,11 @@ public class NettyClientImpl implements NettyClient {
 
     private ScheduledExecutorService scheduledExecutorService;
 
-    private NettyClientConfig config;
+    private URL url;
 
-    public NettyClientImpl(NettyClientConfig config) {
-        this.config = config;
-        codec = ExtensionLoader.getExtensionLoader(Codec.class).getDefaultExtension();
+    public NettyClientImpl(URL url) {
+        this.url = url;
+        codec = ExtensionLoader.getExtensionLoader(Codec.class).getExtension(url.getParameter(URLParam.codec.getName(), URLParam.codec.getValue()));
     }
 
     @Override
@@ -58,8 +59,8 @@ public class NettyClientImpl implements NettyClient {
         b.group(group).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.SO_RCVBUF, config.getReceivedBufferSize())
-                .option(ChannelOption.SO_SNDBUF, config.getSendBufferSize())
+                .option(ChannelOption.SO_RCVBUF, url.getIntParameter(URLParam.bufferSize.getName(), URLParam.bufferSize.getIntValue()))
+                .option(ChannelOption.SO_SNDBUF, url.getIntParameter(URLParam.bufferSize.getName(), URLParam.bufferSize.getIntValue()))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch)

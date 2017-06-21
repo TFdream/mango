@@ -4,7 +4,6 @@ import mango.cluster.loadbalance.LoadBalance;
 import mango.common.Closeable;
 import mango.common.URL;
 import mango.common.URLParam;
-import mango.config.NettyClientConfig;
 import mango.core.DefaultRequest;
 import mango.core.Response;
 import mango.core.extension.ExtensionLoader;
@@ -57,12 +56,14 @@ public class RpcInvoker implements InvocationHandler, NotifyListener, Closeable 
 
         DefaultRequest request = new DefaultRequest();
         request.setRequestId(RequestIdGenerator.getRequestId());
-        request.setClassName(method.getDeclaringClass().getName());
+        request.setInterfaceName(method.getDeclaringClass().getName());
         request.setMethodName(method.getName());
         request.setParameterTypes(method.getParameterTypes());
         request.setArguments(args);
         request.setType(Constants.REQUEST_SYNC);
-
+        //调用参数
+        request.setAttachment(URLParam.version.getName(), url.getVersion());
+        request.setAttachment(URLParam.group.getName(), url.getGroup());
         try {
             //load-balance
             URL url = loadBalanceStrategy.select(urls);
@@ -103,7 +104,7 @@ public class RpcInvoker implements InvocationHandler, NotifyListener, Closeable 
             throw new RpcFrameworkException("Unable discover/subscribe service:"+url.getPath() + " from ["+regProtocol+":"+regAddress+"]", e);
         }
 
-        nettyClient = new NettyClientImpl(new NettyClientConfig());
+        nettyClient = new NettyClientImpl(url);
         nettyClient.start();
     }
 

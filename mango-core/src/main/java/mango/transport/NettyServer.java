@@ -7,7 +7,9 @@ package mango.transport;
  */
 public interface NettyServer {
 
-    void bind() throws InterruptedException;
+    boolean open();
+
+    boolean isAvailable();
 
     void shutdown();
 

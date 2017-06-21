@@ -9,7 +9,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import mango.codec.Codec;
-import mango.config.NettyServerConfig;
+import mango.common.URL;
+import mango.common.URLParam;
 import mango.core.DefaultRequest;
 import mango.core.DefaultResponse;
 import mango.core.extension.ExtensionLoader;
@@ -37,26 +38,34 @@ public class NettyServerImpl implements NettyServer {
     private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
+    private volatile boolean available;
+    private volatile boolean destroyed;
 
     private ThreadPoolExecutor pool;    //业务处理线程池
     private Codec codec;
-    private MessageRouter messageRouter;
-    private NettyServerConfig config;
+    private MessageRouter router;
+    private URL url;
 
-    public NettyServerImpl(NettyServerConfig config){
-        this.config = config;
-        codec = ExtensionLoader.getExtensionLoader(Codec.class).getDefaultExtension();
-        this.messageRouter = ExtensionLoader.getExtensionLoader(MessageRouter.class).getDefaultExtension();
+    public NettyServerImpl(URL url, MessageRouter router){
+        this.url = url;
+        this.router = router;
+        codec = ExtensionLoader.getExtensionLoader(Codec.class).getExtension(url.getParameter(URLParam.codec.getName(), URLParam.codec.getValue()));
     }
 
     @Override
-    public void bind() throws InterruptedException {
+    public synchronized boolean open() {
+
+        if (isAvailable()) {
+            logger.warn("NettyServer ServerChannel already Open: url=" + url);
+            return true;
+        }
+
         this.serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG, config.getBacklogSize())
+                .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.SO_RCVBUF, config.getReceivedBufferSize())
-                .childOption(ChannelOption.SO_SNDBUF, config.getSendBufferSize())
+                .childOption(ChannelOption.SO_RCVBUF, url.getIntParameter(URLParam.bufferSize.getName(), URLParam.bufferSize.getIntValue()))
+                .childOption(ChannelOption.SO_SNDBUF, url.getIntParameter(URLParam.bufferSize.getName(), URLParam.bufferSize.getIntValue()))
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -69,29 +78,45 @@ public class NettyServerImpl implements NettyServer {
                     }
                 });
 
-        pool = new ThreadPoolExecutor(config.getCorePoolSize(), config.getMaximumPoolSize(),
-                config.getKeepAliveTimeSeconds(), TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+        pool = new ThreadPoolExecutor(url.getIntParameter(URLParam.minWorkerThread.getName(), URLParam.minWorkerThread.getIntValue()),
+                url.getIntParameter(URLParam.maxWorkerThread.getName(), URLParam.maxWorkerThread.getIntValue()),
+                120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
                 new DefaultThreadFactory(String.format("%s-%s", Constants.FRAMEWORK_NAME, "biz")));
 
+        try {
+            final int port = url.getPort();
+            ChannelFuture channelFuture = this.serverBootstrap.bind(new InetSocketAddress(port)).sync();
 
-        ChannelFuture channelFuture = this.serverBootstrap.bind(new InetSocketAddress(this.config.getPort())).sync();
+            channelFuture.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture f) throws Exception {
 
-        channelFuture.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture f) throws Exception {
-
-                if(f.isSuccess()){
-                    logger.info("Rpc Server bind port:{} success", config.getPort());
-                } else {
-                    logger.error("Rpc Server bind port:{} failure", config.getPort());
+                    if(f.isSuccess()){
+                        logger.info("Rpc Server bind port:{} success", port);
+                    } else {
+                        logger.error("Rpc Server bind port:{} failure", port);
+                    }
                 }
-            }
-        });
-        logger.info("Rpc Server bind port:{}", config.getPort());
+            });
+            logger.info("Rpc Server bind port:{}", port);
+            available = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return available;
     }
 
     @Override
-    public void shutdown() {
+    public boolean isAvailable() {
+        return available;
+    }
+
+    @Override
+    public synchronized void shutdown() {
+        if(destroyed) {
+            return;
+        }
+        destroyed = true;
         this.bossGroup.shutdownGracefully();
         this.workerGroup.shutdownGracefully();
         this.pool.shutdown();
@@ -138,7 +163,7 @@ public class NettyServerImpl implements NettyServer {
 
     private void processRpcRequest(ChannelHandlerContext context, DefaultRequest request, long processStartTime) {
 
-        DefaultResponse response = (DefaultResponse) this.messageRouter.handle(request);//;
+        DefaultResponse response = (DefaultResponse) this.router.handle(request);//;
         response.setProcessTime(System.currentTimeMillis() - processStartTime);
         if(request.getType()!=Constants.REQUEST_ONEWAY){    //非单向调用
             context.writeAndFlush(response);

@@ -40,6 +40,8 @@ public class AbstractInterfaceConfig {
                 Map<String, String> map = new HashMap<>();
 
                 map.put(URLParam.path.getName(), Registry.class.getName());
+                map.put(URLParam.registryAddress.getName(), String.valueOf(address));
+                map.put(URLParam.registryProtocol.getName(), String.valueOf(protocol));
                 map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
                 map.put(URLParam.protocol.getName(), protocol);
                 map.put(URLParam.registryConnectTimeout.getName(), String.valueOf(config.getConnectTimeout()));

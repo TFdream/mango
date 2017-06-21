@@ -4,6 +4,7 @@ import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
+import mango.protocol.Protocol;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
 
@@ -14,14 +15,16 @@ import java.util.List;
  *
  * @author Ricky Fung
  */
-public class DefaultExporterHandler implements ExporterHandler {
+public class DefaultConfigHandler implements ConfigHandler {
 
     @Override
     public <T> Exporter<T> export(Class<T> interfaceClass, T ref, URL serviceUrl, List<URL> registryUrls) {
 
-        MessageRouter router = ExtensionLoader.getExtensionLoader(MessageRouter.class).getDefaultExtension();
+        String protocolName = serviceUrl.getParameter(URLParam.protocol.getName(), URLParam.protocol.getValue());
         Provider<T> provider = new DefaultProvider<T>(ref, serviceUrl, interfaceClass);
-        Exporter<T> exporter = router.register(provider, serviceUrl);
+        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName);
+        Exporter<T> exporter = protocol.export(provider, serviceUrl);
+
         // register service
         register(registryUrls, serviceUrl);
 
@@ -37,8 +40,8 @@ public class DefaultExporterHandler implements ExporterHandler {
                 throw new RpcFrameworkException("register error! Could not find extension for registry protocol:" + registryUrl.getProtocol()
                                 + ", make sure registry module for " + registryUrl.getProtocol() + " is in classpath!");
             }
-            Registry registry = registryFactory.getRegistry(registryUrl);
             try {
+                Registry registry = registryFactory.getRegistry(registryUrl);
                 registry.register(serviceUrl);
             } catch (Exception e) {
                 throw new RpcFrameworkException("register error! Could not registry service:" + serviceUrl.getPath()

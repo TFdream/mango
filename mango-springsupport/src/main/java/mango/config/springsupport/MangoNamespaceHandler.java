@@ -2,7 +2,6 @@ package mango.config.springsupport;
 
 import mango.config.ProtocolConfig;
 import mango.config.RegistryConfig;
-import mango.config.ServiceConfig;
 import mango.util.ConcurrentHashSet;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
@@ -22,7 +21,7 @@ public class MangoNamespaceHandler extends NamespaceHandlerSupport {
     @Override
     public void init() {
         registerBeanDefinitionParser("reference", new MangoBeanDefinitionParser(ReferenceConfigBean.class, false));
-        registerBeanDefinitionParser("service", new MangoBeanDefinitionParser(ServiceConfig.class, true));
+        registerBeanDefinitionParser("service", new MangoBeanDefinitionParser(ServiceConfigBean.class, true));
         registerBeanDefinitionParser("registry", new MangoBeanDefinitionParser(RegistryConfig.class, true));
         registerBeanDefinitionParser("protocol", new MangoBeanDefinitionParser(ProtocolConfig.class, true));
     }

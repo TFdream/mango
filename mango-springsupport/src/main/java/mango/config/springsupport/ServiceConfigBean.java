@@ -4,7 +4,7 @@ import mango.config.ProtocolConfig;
 import mango.config.RegistryConfig;
 import mango.config.ServiceConfig;
 import mango.util.CollectionUtil;
-import mango.util.MangoUtils;
+import mango.util.MangoFrameworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -69,7 +69,7 @@ public class ServiceConfigBean<T> extends ServiceConfig<T> implements BeanFactor
             }
         }
         if (CollectionUtil.isEmpty(getRegistries())) {
-            setRegistry(MangoUtils.getDefaultRegistryConfig());
+            setRegistry(MangoFrameworkUtils.getDefaultRegistryConfig());
         }
     }
 
@@ -88,7 +88,7 @@ public class ServiceConfigBean<T> extends ServiceConfig<T> implements BeanFactor
             }
         }
         if (CollectionUtil.isEmpty(getProtocols())) {
-            setProtocol(MangoUtils.getDefaultProtocolConfig());
+            setProtocol(MangoFrameworkUtils.getDefaultProtocolConfig());
         }
     }
 }

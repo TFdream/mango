@@ -5,7 +5,7 @@ import mango.config.ProtocolConfig;
 import mango.config.ReferenceConfig;
 import mango.config.RegistryConfig;
 import mango.util.CollectionUtil;
-import mango.util.MangoUtils;
+import mango.util.MangoFrameworkUtils;
 import mango.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements
             }
         }
         if (CollectionUtil.isEmpty(getRegistries())) {
-            setRegistry(MangoUtils.getDefaultRegistryConfig());
+            setRegistry(MangoFrameworkUtils.getDefaultRegistryConfig());
         }
     }
 
@@ -107,7 +107,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements
             }
         }
         if (CollectionUtil.isEmpty(getProtocols())) {
-            setProtocol(MangoUtils.getDefaultProtocolConfig());
+            setProtocol(MangoFrameworkUtils.getDefaultProtocolConfig());
         }
     }
 }

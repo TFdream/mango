@@ -4,7 +4,7 @@ import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.rpc.Exporter;
-import mango.rpc.ExporterHandler;
+import mango.rpc.ConfigHandler;
 import mango.util.Constants;
 import mango.util.NetUtils;
 import mango.util.StringUtils;
@@ -32,7 +32,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
     protected synchronized void export() {
         if (exported) {
-            logger.warn(String.format("%s has already been exported, so ignore the export request!", interfaceClass.getName()));
+            logger.warn(String.format("%s has already been exported, so ignore the export request!", interfaceName));
             return;
         }
         exported = true;
@@ -40,9 +40,8 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
         if (ref == null) {
             throw new IllegalStateException("ref not allow null!");
         }
-        Class<?> interfaceClass;
         try {
-            interfaceClass = Class.forName(interfaceName, true, Thread.currentThread().getContextClassLoader());
+            interfaceClass = (Class<T>) Class.forName(interfaceName, true, Thread.currentThread().getContextClassLoader());
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -86,8 +85,8 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
         URL serviceUrl = new URL(protocolName, hostAddress, protocol.getPort(), interfaceClass.getName(), map);
 
-        ExporterHandler exporterHandler = ExtensionLoader.getExtensionLoader(ExporterHandler.class).getExtension(Constants.DEFAULT_VALUE);
-        exporters.add(exporterHandler.export(interfaceClass, ref, serviceUrl, registryUrls));
+        ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
+        exporters.add(configHandler.export(interfaceClass, ref, serviceUrl, registryUrls));
     }
 
     public T getRef() {
