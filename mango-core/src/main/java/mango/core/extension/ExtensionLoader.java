@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ExtensionLoader<T> {
 
-    public static final String PREFIX = "META-INF/extensions/";
+    private static final String PREFIX = "META-INF/extensions/";
 
     private static final ConcurrentHashMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<>();
 
@@ -304,13 +304,13 @@ public class ExtensionLoader<T> {
     }
 
     private synchronized ConcurrentMap<String, Class<T>> loadExtensionClasses(String prefix) {
-        String fileName = null;
+        String fullName = null;
         try {
             ConcurrentMap<String, Class<T>> extName2Class = new ConcurrentHashMap<>();
             ClassLoader classLoader = this.classLoader;
-            fileName = prefix + type.getName();
+            fullName = prefix + type.getName();
 
-            Enumeration<URL> urls = classLoader.getResources(fileName);
+            Enumeration<URL> urls = classLoader.getResources(fullName);
             if (urls == null || !urls.hasMoreElements()) {
                 return extName2Class;
             }
@@ -323,7 +323,7 @@ public class ExtensionLoader<T> {
             return extName2Class;
         } catch (Throwable t) {
             throw new IllegalArgumentException("Exception when load extension point(interface: " +
-                    type.getName() + ", description file: " + fileName + ").", t);
+                    type.getName() + ", description file: " + fullName + ").", t);
         }
     }
 
