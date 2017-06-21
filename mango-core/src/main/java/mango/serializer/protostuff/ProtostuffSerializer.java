@@ -7,7 +7,7 @@ import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import mango.serializer.Serializer;
+import mango.codec.Serializer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

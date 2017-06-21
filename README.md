@@ -24,11 +24,6 @@ Mango is a high-performance, open-source Java RPC framework.
         <artifactId>mango-registry-zk</artifactId>
         <version>1.0.0</version>
     </dependency>
-    <dependency>
-        <groupId>com.mindflow</groupId>
-        <artifactId>mango-serializer-protostuff</artifactId>
-        <version>1.0.0</version>
-    </dependency>
     
     <!--集成Spring -->
     <dependency>

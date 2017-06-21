@@ -1,4 +1,4 @@
-package mango.serializer;
+package mango.codec;
 
 import mango.core.extension.SPI;
 import mango.core.extension.Scope;

@@ -3,7 +3,7 @@ package mango.serializer.fst;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import mango.serializer.Serializer;
+import mango.codec.Serializer;
 import org.nustaq.serialization.FSTConfiguration;
 
 import java.io.IOException;

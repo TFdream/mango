@@ -1,7 +1,7 @@
 package mango.serializer.fastjson;
 
 import com.alibaba.fastjson.JSON;
-import mango.serializer.Serializer;
+import mango.codec.Serializer;
 import mango.util.StringUtils;
 
 import java.io.IOException;

@@ -1,7 +1,7 @@
 package mango.serializer.msgpack;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mango.serializer.Serializer;
+import mango.codec.Serializer;
 import org.msgpack.jackson.dataformat.MessagePackFactory;
 import java.io.IOException;
 

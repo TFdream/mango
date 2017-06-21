@@ -25,6 +25,17 @@
             <version>${netty.version}</version>
         </dependency>
 
+        <!--serialization-->
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dyuproject.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>${protostuff.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.objenesis</groupId>

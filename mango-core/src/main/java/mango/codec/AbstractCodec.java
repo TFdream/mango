@@ -1,7 +1,5 @@
 package mango.codec;
 
-import mango.serializer.Serializer;
-
 import java.io.IOException;
 
 /**

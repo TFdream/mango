@@ -43,11 +43,6 @@
         <!--serialization-->
         <dependency>
             <groupId>com.mindflow</groupId>
-            <artifactId>mango-serializer-protostuff</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mindflow</groupId>
             <artifactId>mango-serializer-hessian</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

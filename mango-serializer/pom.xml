@@ -15,7 +15,6 @@
 
     <modules>
         <module>mango-serializer-hessian</module>
-        <module>mango-serializer-protostuff</module>
         <module>mango-serializer-msgpack</module>
         <module>mango-serializer-kryo</module>
         <module>mango-serializer-jackson</module>

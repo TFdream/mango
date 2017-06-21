@@ -2,7 +2,7 @@ package mango.serializer.hessian;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import mango.serializer.Serializer;
+import mango.codec.Serializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

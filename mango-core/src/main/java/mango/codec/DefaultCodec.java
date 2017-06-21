@@ -5,7 +5,6 @@ import mango.common.URLParam;
 import mango.core.DefaultRequest;
 import mango.core.DefaultResponse;
 import mango.core.extension.ExtensionLoader;
-import mango.serializer.Serializer;
 import mango.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
