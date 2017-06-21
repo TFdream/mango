@@ -1,13 +1,14 @@
 package mango.transport;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 import mango.codec.Codec;
+import mango.common.URL;
 import mango.core.DefaultResponse;
 import mango.core.Request;
 import mango.core.Response;
 import mango.util.Constants;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +20,11 @@ import org.slf4j.LoggerFactory;
 public class NettyEncoder extends MessageToByteEncoder {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private Codec codec;
+    private URL url;
 
-    public NettyEncoder(Codec codec) {
+    public NettyEncoder(Codec codec, URL url) {
         this.codec = codec;
+        this.url = url;
     }
 
     @Override
@@ -32,14 +35,14 @@ public class NettyEncoder extends MessageToByteEncoder {
 
         if (msg instanceof Response) {
             try {
-                data = codec.encode(ctx.channel(), msg);
+                data = codec.encode(url, msg);
             } catch (Exception e) {
                 logger.error("RpcEncoder encode error, requestId=" + requestId, e);
                 Response response = buildExceptionResponse(requestId, e);
-                data = codec.encode(ctx.channel(), response);
+                data = codec.encode(url, response);
             }
         } else {
-            data = codec.encode(ctx.channel(), msg);
+            data = codec.encode(url, msg);
         }
 
         out.writeShort(Constants.NETTY_MAGIC_TYPE);

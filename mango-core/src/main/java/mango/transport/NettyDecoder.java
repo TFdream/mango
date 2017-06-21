@@ -1,13 +1,14 @@
 package mango.transport;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import mango.codec.Codec;
+import mango.common.URL;
 import mango.core.DefaultResponse;
 import mango.core.Response;
 import mango.exception.RpcFrameworkException;
 import mango.util.Constants;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,12 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
     private int maxFrameLength;
     private Codec codec;
+    private URL url;
 
-    public NettyDecoder(Codec codec, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
+    public NettyDecoder(Codec codec, URL url, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
         super(maxFrameLength, lengthFieldOffset, lengthFieldLength);
         this.codec = codec;
+        this.url = url;
         this.maxFrameLength = maxFrameLength;
     }
 
@@ -77,7 +80,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
         in.readBytes(data);
 
         try {
-            return codec.decode(ctx.channel(), messageType, data);
+            return codec.decode(url, messageType, data);
         } catch (Exception e) {
             if (messageType == Constants.FLAG_REQUEST) {
                 Response response = buildExceptionResponse(requestId, e);

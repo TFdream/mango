@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ${DESCRIPTION}
@@ -49,6 +51,8 @@ public class ReferenceInvocationHandler<T> implements InvocationHandler {
         //调用参数
         request.setAttachment(URLParam.version.getName(), invoker.getServiceUrl().getVersion());
         request.setAttachment(URLParam.group.getName(), invoker.getServiceUrl().getGroup());
+
+        boolean throwException = checkMethodExceptionSignature(method);
         try {
             Response resp = invoker.call(request);
             return getValue(resp);
@@ -63,11 +67,19 @@ public class ReferenceInvocationHandler<T> implements InvocationHandler {
                                     + ", errmsg:" + t.getMessage());
                     throw new RpcServiceException(msg);
                 }
+            } else if (!throwException) {
+                logger.warn(this.getClass().getSimpleName()+" invoke false, so return default value: uri=" + invoker.getServiceUrl().getUri(), e);
+                return getDefaultReturnValue(method.getReturnType());
             } else {
                 logger.error(this.getClass().getSimpleName()+" invoke Error: uri=" + invoker.getServiceUrl().getUri(), e);
                 throw e;
             }
         }
+    }
+
+    private boolean checkMethodExceptionSignature(Method method) {
+        Class<?>[] exps = method.getExceptionTypes();
+        return exps!=null && exps.length>0;
     }
 
     public Object getValue(Response resp) {
@@ -77,5 +89,42 @@ public class ReferenceInvocationHandler<T> implements InvocationHandler {
                     exception.getMessage(), exception);
         }
         return resp.getResult();
+    }
+
+
+    private Object getDefaultReturnValue(Class<?> returnType) {
+        if (returnType != null && returnType.isPrimitive()) {
+            return PrimitiveDefault.getDefaultReturnValue(returnType);
+        }
+        return null;
+    }
+
+    private static class PrimitiveDefault {
+        private static boolean defaultBoolean;
+        private static char defaultChar;
+        private static byte defaultByte;
+        private static short defaultShort;
+        private static int defaultInt;
+        private static long defaultLong;
+        private static float defaultFloat;
+        private static double defaultDouble;
+
+        private static Map<Class<?>, Object> primitiveValues = new HashMap<Class<?>, Object>();
+
+        static {
+            primitiveValues.put(boolean.class, defaultBoolean);
+            primitiveValues.put(char.class, defaultChar);
+            primitiveValues.put(byte.class, defaultByte);
+            primitiveValues.put(short.class, defaultShort);
+            primitiveValues.put(int.class, defaultInt);
+            primitiveValues.put(long.class, defaultLong);
+            primitiveValues.put(float.class, defaultFloat);
+            primitiveValues.put(double.class, defaultDouble);
+        }
+
+        public static Object getDefaultReturnValue(Class<?> returnType) {
+            return primitiveValues.get(returnType);
+        }
+
     }
 }

@@ -67,6 +67,9 @@ public class NettyServerImpl implements NettyServer {
             logger.warn("NettyServer ServerChannel already Open: url=" + url);
             return true;
         }
+        // 最大响应包限制
+        final int maxContentLength = url.getIntParameter(URLParam.maxContentLength.getName(),
+                URLParam.maxContentLength.getIntValue());
 
         this.serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
@@ -80,8 +83,8 @@ public class NettyServerImpl implements NettyServer {
                     public void initChannel(SocketChannel ch)
                             throws IOException {
 
-                        ch.pipeline().addLast(new NettyDecoder(codec, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(codec), //
+                        ch.pipeline().addLast(new NettyDecoder(codec, url, maxContentLength, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(codec, url), //
                                 new NettyServerHandler());
                     }
                 });

@@ -15,9 +15,9 @@
 
     <mango:application name="mango-client" />
 
-    <mango:protocol name="mango" port="21918" serialization="hessian"/>
+    <mango:protocol name="mango" port="21918" serialization="protostuff"/>
 
-    <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="5000" />
+    <mango:registry protocol="zookeeper" address="127.0.0.1:2181" connect-timeout="5000" />
 
     <!--引用服务-->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />

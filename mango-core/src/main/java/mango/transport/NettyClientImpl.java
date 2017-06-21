@@ -63,6 +63,10 @@ public class NettyClientImpl implements NettyClient {
             return;
         }
         initialized = true;
+
+        // 最大响应包限制
+        final int maxContentLength = url.getIntParameter(URLParam.maxContentLength.getName(),
+                URLParam.maxContentLength.getIntValue());
         b.group(group).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -72,8 +76,8 @@ public class NettyClientImpl implements NettyClient {
                     @Override
                     public void initChannel(SocketChannel ch)
                             throws Exception {
-                        ch.pipeline().addLast(new NettyDecoder(codec, Constants.MAX_FRAME_LENGTH, Constants.HEADER_SIZE, 4), //
-                                new NettyEncoder(codec), //
+                        ch.pipeline().addLast(new NettyDecoder(codec, url, maxContentLength, Constants.HEADER_SIZE, 4), //
+                                new NettyEncoder(codec, url), //
                                 new NettyClientHandler());
                     }
                 });

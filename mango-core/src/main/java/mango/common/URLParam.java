@@ -30,6 +30,8 @@ public enum URLParam {
     maxWorkerThread("maxWorkerThread", 200),
 
     /**netty**/
+    maxContentLength("maxContentLength", 1<<24),
+
     bufferSize("buffer_size", 1024*16),
 
     loadBalance("loadbalance", "random"),

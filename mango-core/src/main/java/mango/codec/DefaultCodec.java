@@ -1,11 +1,14 @@
 package mango.codec;
 
+import mango.common.URL;
+import mango.common.URLParam;
 import mango.core.DefaultRequest;
 import mango.core.DefaultResponse;
 import mango.core.extension.ExtensionLoader;
 import mango.serializer.Serializer;
 import mango.util.Constants;
-import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -15,19 +18,22 @@ import java.io.IOException;
  * @author Ricky Fung
  */
 public class DefaultCodec extends AbstractCodec {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public byte[] encode(Channel channel, Object message) throws IOException {
-
-        return serialize(message, ExtensionLoader.getExtensionLoader(Serializer.class).getDefaultExtension());
+    public byte[] encode(URL url, Object message) throws IOException {
+        String serialization = url.getParameter(URLParam.serialization.getName(), URLParam.serialization.getValue());
+        logger.info("Codec encode serialization:{}", serialization);
+        return serialize(message, ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(serialization));
     }
 
     @Override
-    public Object decode(Channel channel, byte messageType, byte[] data) throws IOException {
-
+    public Object decode(URL url, byte messageType, byte[] data) throws IOException {
+        String serialization = url.getParameter(URLParam.serialization.getName(), URLParam.serialization.getValue());
+        logger.info("Codec decode serialization:{}", serialization);
         if(messageType == Constants.FLAG_REQUEST) {
-            return deserialize(data, DefaultRequest.class, ExtensionLoader.getExtensionLoader(Serializer.class).getDefaultExtension());
+            return deserialize(data, DefaultRequest.class, ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(serialization));
         }
-        return deserialize(data, DefaultResponse.class, ExtensionLoader.getExtensionLoader(Serializer.class).getDefaultExtension());
+        return deserialize(data, DefaultResponse.class, ExtensionLoader.getExtensionLoader(Serializer.class).getExtension(serialization));
     }
 }
