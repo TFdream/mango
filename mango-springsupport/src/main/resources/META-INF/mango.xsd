@@ -110,4 +110,23 @@
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="application">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="abstractConfig">
+                    <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                        <xsd:element ref="beans:property" minOccurs="0" maxOccurs="unbounded" />
+                    </xsd:choice>
+                    <xsd:attribute name="id" type="xsd:ID" />
+                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                    <xsd:attribute name="manager" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="organization" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="version" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="env" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="default" type="xsd:boolean" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
 </xsd:schema>

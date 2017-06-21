@@ -13,6 +13,8 @@
     <context:annotation-config/>
     <context:component-scan base-package="mango.demo.client"/>
 
+    <mango:application name="mango-client" />
+
     <mango:protocol name="mango" port="21918" serialization="hessian"/>
 
     <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="5000" />

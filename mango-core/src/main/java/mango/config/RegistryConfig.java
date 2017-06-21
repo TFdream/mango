@@ -1,15 +1,11 @@
 package mango.config;
 
-import java.io.Serializable;
-
 /**
  * @author Ricky Fung
  */
-public class RegistryConfig implements Serializable {
+public class RegistryConfig extends AbstractConfig {
 
     private static final long serialVersionUID = -8358809338589687068L;
-
-    private String id;
     private String protocol;
     private String address;
 
@@ -20,14 +16,6 @@ public class RegistryConfig implements Serializable {
     private Integer connectTimeout;
 
     private Boolean isDefault = Boolean.TRUE;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getProtocol() {
         return protocol;

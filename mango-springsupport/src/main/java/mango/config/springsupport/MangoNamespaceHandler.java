@@ -1,5 +1,6 @@
 package mango.config.springsupport;
 
+import mango.config.ApplicationConfig;
 import mango.config.ProtocolConfig;
 import mango.config.RegistryConfig;
 import mango.util.ConcurrentHashSet;
@@ -17,6 +18,7 @@ public class MangoNamespaceHandler extends NamespaceHandlerSupport {
     public final static Set<String> registryDefineNames = new ConcurrentHashSet<String>();
     public final static Set<String> serviceConfigDefineNames = new ConcurrentHashSet<String>();
     public final static Set<String> referenceConfigDefineNames = new ConcurrentHashSet<String>();
+    public final static Set<String> applicationConfigDefineNames = new ConcurrentHashSet<String>();
 
     @Override
     public void init() {
@@ -24,5 +26,6 @@ public class MangoNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("service", new MangoBeanDefinitionParser(ServiceConfigBean.class, true));
         registerBeanDefinitionParser("registry", new MangoBeanDefinitionParser(RegistryConfig.class, true));
         registerBeanDefinitionParser("protocol", new MangoBeanDefinitionParser(ProtocolConfig.class, true));
+        registerBeanDefinitionParser("application", new MangoBeanDefinitionParser(ApplicationConfig.class, true));
     }
 }

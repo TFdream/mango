@@ -1,17 +1,13 @@
 package mango.config;
 
-import java.io.Serializable;
-
 /**
  * ${DESCRIPTION}
  *
  * @author Ricky Fung
  */
-public class ProtocolConfig implements Serializable {
+public class ProtocolConfig extends AbstractConfig {
 
     private static final long serialVersionUID = 1896740286017633L;
-
-    private String id;
     private String name;
     private String host;
     private Integer port;
@@ -28,14 +24,6 @@ public class ProtocolConfig implements Serializable {
     private Integer heartbeat;  //心跳间隔
 
     private Boolean isDefault = Boolean.TRUE;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

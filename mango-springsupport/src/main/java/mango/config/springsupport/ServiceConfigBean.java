@@ -45,6 +45,7 @@ public class ServiceConfigBean<T> extends ServiceConfig<T> implements BeanFactor
     public void afterPropertiesSet() throws Exception {
 
         logger.debug("check service interface:%s config", getInterfaceName());
+        checkApplication();
         checkRegistryConfig();
         checkProtocolConfig();
     }

@@ -14,13 +14,17 @@ import java.util.*;
  *
  * @author Ricky Fung
  */
-public class AbstractInterfaceConfig {
-    private String id;
+public class AbstractInterfaceConfig extends AbstractConfig {
+
+    private static final long serialVersionUID = 3928005245888186559L;
     protected String interfaceName;
     protected String group;
     protected String version;
     protected Integer timeout;
     protected Integer retries;
+
+    // 应用信息
+    protected ApplicationConfig application;
 
     //server暴露服务使用的协议，暴露可以使用多种协议，但client只能用一种协议进行访问，原因是便于client的管理
     protected List<ProtocolConfig> protocols;
@@ -38,7 +42,7 @@ public class AbstractInterfaceConfig {
                     protocol = Constants.REGISTRY_PROTOCOL_LOCAL;
                 }
                 Map<String, String> map = new HashMap<>();
-
+                map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
                 map.put(URLParam.path.getName(), Registry.class.getName());
                 map.put(URLParam.registryAddress.getName(), String.valueOf(address));
                 map.put(URLParam.registryProtocol.getName(), String.valueOf(protocol));
@@ -65,12 +69,15 @@ public class AbstractInterfaceConfig {
         return registryList;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    protected void checkApplication() {
+        if (application == null) {
+            application = new ApplicationConfig();
+        }
+        if (application == null) {
+            throw new IllegalStateException(
+                    "No such application config! Please add <mango:application name=\"...\" /> to your spring config.");
+        }
+        application.setName(UUID.randomUUID().toString());
     }
 
     public String getInterfaceName() {
@@ -111,6 +118,14 @@ public class AbstractInterfaceConfig {
 
     public void setRetries(Integer retries) {
         this.retries = retries;
+    }
+
+    public ApplicationConfig getApplication() {
+        return application;
+    }
+
+    public void setApplication(ApplicationConfig application) {
+        this.application = application;
     }
 
     public List<ProtocolConfig> getProtocols() {

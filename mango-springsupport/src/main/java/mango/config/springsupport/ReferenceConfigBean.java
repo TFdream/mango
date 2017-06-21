@@ -50,6 +50,7 @@ public class ReferenceConfigBean<T> extends ReferenceConfig<T> implements
 
         logger.debug("check reference interface:%s config", getInterfaceName());
         //检查依赖的配置
+        checkApplication();
         checkProtocolConfig();
         checkRegistryConfig();
 

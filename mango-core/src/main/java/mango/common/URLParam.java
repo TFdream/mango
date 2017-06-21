@@ -8,6 +8,8 @@ import mango.util.Constants;
  * @author Ricky Fung
  */
 public enum URLParam {
+
+    application("application", ""),
     /** version **/
     version("version", "1.0.0"),
     /** group **/

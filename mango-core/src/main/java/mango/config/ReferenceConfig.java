@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public class ReferenceConfig<T> extends AbstractInterfaceConfig {
 
+    private static final long serialVersionUID = 3259358868568571457L;
     private Class<T> interfaceClass;
     protected transient volatile T proxy;
 
@@ -76,6 +77,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
         InetAddress localAddress = NetUtils.getLocalAddress();
 
         Map<String, String> map = new HashMap<>();
+        map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
         map.put(URLParam.registryProtocol.getName(), regUrl.getProtocol());
         map.put(URLParam.registryAddress.getName(), regUrl.getParameter(URLParam.registryAddress.getName()));
         map.put(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParam.serialization.getValue());

@@ -1,5 +1,6 @@
 package mango.config.springsupport;
 
+import mango.config.ApplicationConfig;
 import mango.config.ProtocolConfig;
 import mango.config.RegistryConfig;
 import mango.util.StringUtils;
@@ -70,7 +71,16 @@ public class MangoBeanDefinitionParser implements BeanDefinitionParser {
         bd.getPropertyValues().addPropertyValue("id", id);
 
         //解析属性
-        if (ProtocolConfig.class.equals(beanClass)) {
+        if (ApplicationConfig.class.equals(beanClass)) {
+            MangoNamespaceHandler.applicationConfigDefineNames.add(id);
+            parseCommonProperty("name", null, element, bd, parserContext);
+            parseCommonProperty("manager", null, element, bd, parserContext);
+            parseCommonProperty("organization", null, element, bd, parserContext);
+            parseCommonProperty("version", null, element, bd, parserContext);
+            parseCommonProperty("env", null, element, bd, parserContext);
+            parseCommonProperty("default", "isDefault", element, bd, parserContext);
+
+        } else if (ProtocolConfig.class.equals(beanClass)) {
             MangoNamespaceHandler.protocolDefineNames.add(id);
 
             parseCommonProperty("name", null, element, bd, parserContext);

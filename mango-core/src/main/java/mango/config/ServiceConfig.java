@@ -22,6 +22,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Ricky Fung
  */
 public class ServiceConfig<T> extends AbstractInterfaceConfig {
+
+    private static final long serialVersionUID = -6784362174923673740L;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private volatile boolean exported = false;
@@ -76,6 +79,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
         }
 
         Map<String, String> map = new HashMap<String, String>();
+        map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
         map.put(URLParam.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParam.version.getValue());
         map.put(URLParam.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParam.group.getValue());
         map.put(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocol.getSerialization()) ? protocol.getSerialization(): URLParam.serialization.getValue());
