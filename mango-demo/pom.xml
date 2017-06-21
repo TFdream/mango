@@ -47,6 +47,13 @@
             <version>${springframework.version}</version>
         </dependency>
 
+        <!--for test-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.mindflow</groupId>
             <artifactId>mango-springsupport</artifactId>

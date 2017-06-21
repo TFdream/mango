@@ -20,5 +20,6 @@
     <!--引用服务-->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />
     <mango:reference id="userService" interface="mango.demo.service.UserService"/>
+    <mango:reference id="fooService" interface="mango.demo.service.FooService"/>
 
 </beans>

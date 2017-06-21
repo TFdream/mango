@@ -39,6 +39,8 @@ public class NettyServerImpl implements NettyServer {
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
     private ServerBootstrap serverBootstrap = new ServerBootstrap();
     private volatile boolean available;
+
+    private volatile boolean initialized;
     private volatile boolean destroyed;
 
     private ThreadPoolExecutor pool;    //业务处理线程池
@@ -54,6 +56,12 @@ public class NettyServerImpl implements NettyServer {
 
     @Override
     public synchronized boolean open() {
+
+        if(initialized) {
+            logger.warn("NettyServer ServerChannel init: url=" + url);
+            return true;
+        }
+        initialized = true;
 
         if (isAvailable()) {
             logger.warn("NettyServer ServerChannel already Open: url=" + url);

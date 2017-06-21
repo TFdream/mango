@@ -13,4 +13,5 @@ public interface DemoService {
     String echo(String msg);
 
     Map<String, String> introduce(String name, List<String> hobbies);
+
 }

@@ -21,4 +21,8 @@
     <mango:service interface="mango.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />
     <mango:service interface="mango.demo.service.UserService" ref="userService" version="1.0.0" />
 
+    <mango:service interface="mango.demo.service.FooService" ref="fooService"/>
+
+    <bean id="fooService" class="mango.demo.server.service.impl.FooServiceImpl" />
+
 </beans>
