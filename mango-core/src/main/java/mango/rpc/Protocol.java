@@ -1,9 +1,7 @@
-package mango.protocol;
+package mango.rpc;
 
 import mango.common.URL;
 import mango.core.extension.SPI;
-import mango.rpc.Exporter;
-import mango.rpc.Provider;
 import mango.util.Constants;
 
 /**
@@ -13,6 +11,8 @@ import mango.util.Constants;
  */
 @SPI(Constants.FRAMEWORK_NAME)
 public interface Protocol {
+
+    <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl);
 
     <T> Exporter<T> export(Provider<T> provider, URL url);
 }

@@ -4,7 +4,6 @@ import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
-import mango.protocol.Protocol;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
 
@@ -16,6 +15,13 @@ import java.util.List;
  * @author Ricky Fung
  */
 public class DefaultConfigHandler implements ConfigHandler {
+
+    @Override
+    public <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl) {
+        String protocolName = serviceUrl.getParameter(URLParam.protocol.getName(), URLParam.protocol.getValue());
+        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName);
+        return protocol.refer(clz, url, serviceUrl);
+    }
 
     @Override
     public <T> Exporter<T> export(Class<T> interfaceClass, T ref, URL serviceUrl, List<URL> registryUrls) {

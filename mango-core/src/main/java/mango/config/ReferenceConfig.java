@@ -4,12 +4,17 @@ import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.proxy.ProxyFactory;
-import mango.rpc.RpcInvoker;
+import mango.proxy.ReferenceInvocationHandler;
+import mango.rpc.ConfigHandler;
+import mango.rpc.Invoker;
 import mango.util.Constants;
 import mango.util.NetUtils;
 import mango.util.StringUtils;
 
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ${DESCRIPTION}
@@ -22,8 +27,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     protected transient volatile T proxy;
 
     private transient volatile boolean initialized;
-    private ProxyFactory proxyFactory  = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getDefaultExtension();
-    private RpcInvoker invoker;
+    private Invoker<T> invoker;
 
     public T get() {
         if (proxy == null) {
@@ -47,32 +51,51 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
             throw new IllegalStateException("reference class not found", e);
         }
 
-        proxy = createProxy();
+        this.invoker = createInvoker();
+
+        proxy = createProxy(invoker);
     }
 
-    private T createProxy() {
+    private Invoker<T> createInvoker() {
         if(!interfaceClass.isInterface()) {
             throw new IllegalArgumentException("<mango:reference interface=\"\" /> is not interface!");
         }
 
-        RegistryConfig registryConfig = registries.get(0);
+        List<URL> registryUrls = loadRegistryUrls();
+        if (registryUrls == null || registryUrls.size() == 0) {
+            throw new IllegalStateException("Should set registry config for reference:" + interfaceClass.getName());
+        }
+
+        URL regUrl = registryUrls.get(0);
+
         ProtocolConfig protocolConfig = protocols.get(0);
         Integer port = protocolConfig.getPort();
         if(port==null) {
             port = Constants.DEFAULT_PORT;
         }
         InetAddress localAddress = NetUtils.getLocalAddress();
-        URL url = new URL(URLParam.codec.getValue(), localAddress.getHostAddress(), port, interfaceClass.getName());
-        url.addParameter(URLParam.registryProtocol.getName(), registryConfig.getProtocol());
-        url.addParameter(URLParam.registryAddress.getName(), registryConfig.getAddress());
-        url.addParameter(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParam.serialization.getValue());
-        url.addParameter(URLParam.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParam.version.getValue());
-        url.addParameter(URLParam.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParam.group.getValue());
-        url.addParameter(URLParam.side.getName(), Constants.CONSUMER);
-        url.addParameter(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
 
-        invoker = new RpcInvoker(url, timeout);
-        return (T) proxyFactory.getProxy(interfaceClass, invoker);
+        Map<String, String> map = new HashMap<>();
+        map.put(URLParam.registryProtocol.getName(), regUrl.getProtocol());
+        map.put(URLParam.registryAddress.getName(), regUrl.getParameter(URLParam.registryAddress.getName()));
+        map.put(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParam.serialization.getValue());
+        map.put(URLParam.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParam.version.getValue());
+        map.put(URLParam.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParam.group.getValue());
+        map.put(URLParam.side.getName(), Constants.CONSUMER);
+        map.put(URLParam.requestTimeout.getName(), String.valueOf(getTimeout()));
+        map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+
+        URL refUrl = new URL(URLParam.codec.getValue(), localAddress.getHostAddress(), port, interfaceClass.getName(), map);
+
+        ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
+        invoker = configHandler.refer(interfaceClass, regUrl, refUrl);
+        return invoker;
+    }
+
+    private T createProxy(Invoker<T> invoker) {
+        String proxyType = invoker.getServiceUrl().getParameter(URLParam.proxyType.getName(), URLParam.proxyType.getValue());
+        ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getExtension(proxyType);
+        return (T) proxyFactory.getProxy(interfaceClass, new ReferenceInvocationHandler<>(invoker));
     }
 
     public T getProxy() {
@@ -92,6 +115,6 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     }
 
     protected void destroy0() throws Exception {
-        invoker.close();
+        invoker.destroy();
     }
 }

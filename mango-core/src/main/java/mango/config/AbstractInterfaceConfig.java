@@ -44,8 +44,18 @@ public class AbstractInterfaceConfig {
                 map.put(URLParam.registryProtocol.getName(), String.valueOf(protocol));
                 map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
                 map.put(URLParam.protocol.getName(), protocol);
-                map.put(URLParam.registryConnectTimeout.getName(), String.valueOf(config.getConnectTimeout()));
-                map.put(URLParam.registrySessionTimeout.getName(), String.valueOf(config.getSessionTimeout()));
+
+                Integer connectTimeout = URLParam.registryConnectTimeout.getIntValue();
+                if(config.getConnectTimeout()!=null) {
+                    connectTimeout = config.getConnectTimeout();
+                }
+                map.put(URLParam.registryConnectTimeout.getName(), String.valueOf(connectTimeout));
+
+                Integer sessionTimeout = URLParam.registrySessionTimeout.getIntValue();
+                if(config.getSessionTimeout()!=null) {
+                    sessionTimeout = config.getSessionTimeout();
+                }
+                map.put(URLParam.registrySessionTimeout.getName(), String.valueOf(sessionTimeout));
 
                 String[] arr = address.split(Constants.HOST_PORT_SEPARATOR);
                 URL url = new URL(protocol, arr[0], Integer.parseInt(arr[1]), Registry.class.getName(), map);

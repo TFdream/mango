@@ -30,6 +30,7 @@ public enum URLParam {
     /**netty**/
     bufferSize("buffer_size", 1024*16),
 
+    loadBalance("loadbalance", "random"),
 
     retries("retries", 0),
 
