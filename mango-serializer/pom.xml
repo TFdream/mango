@@ -20,6 +20,7 @@
         <module>mango-serializer-jackson</module>
         <module>mango-serializer-fastjson</module>
         <module>mango-serializer-fst</module>
+        <module>mango-serializer-jdk</module>
     </modules>
 
     <properties>

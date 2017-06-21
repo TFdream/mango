@@ -311,12 +311,13 @@ public class ExtensionLoader<T> {
             fileName = prefix + type.getName();
 
             Enumeration<URL> urls = classLoader.getResources(fileName);
+            if (urls == null || !urls.hasMoreElements()) {
+                return extName2Class;
+            }
 
-            if (urls != null) { // 找到的urls为null，或是没有找到文件，即认为是没有找到扩展点
-                while (urls.hasMoreElements()) {
-                    URL url = urls.nextElement();
-                    readExtensionClasses0(extName2Class, classLoader, url);
-                }
+            while (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                readExtensionClasses0(extName2Class, classLoader, url);
             }
 
             return extName2Class;

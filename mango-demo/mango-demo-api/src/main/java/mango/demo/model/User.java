@@ -1,9 +1,14 @@
 package mango.demo.model;
 
+import java.io.Serializable;
+
 /**
  * @author Ricky Fung
  */
-public class User {
+public class User implements Serializable {
+
+    private static final long serialVersionUID = 8989971275886860227L;
+
     private Long id;
     private String name;
     private String password;
