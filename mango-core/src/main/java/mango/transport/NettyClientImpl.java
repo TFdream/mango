@@ -43,6 +43,9 @@ public class NettyClientImpl implements NettyClient {
     private final ConcurrentHashMap<String, ChannelWrapper> channelTable =
             new ConcurrentHashMap<>();
 
+    private volatile boolean initialized;
+    private volatile boolean destroyed;
+
     private Codec codec;
 
     private ScheduledExecutorService scheduledExecutorService;
@@ -56,6 +59,10 @@ public class NettyClientImpl implements NettyClient {
 
     @Override
     public void start() {
+        if(initialized){
+            return;
+        }
+        initialized = true;
         b.group(group).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -85,9 +92,7 @@ public class NettyClientImpl implements NettyClient {
     @Override
     public Response invokeSync(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
         Channel channel = getChannel(address);
-
         if (channel != null && channel.isActive()) {
-
             final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeoutInMillis);
             this.responseFutureMap.put(request.getRequestId(), rpcFuture);
             //写数据
@@ -105,7 +110,6 @@ public class NettyClientImpl implements NettyClient {
                     }
                 }
             });
-
             return rpcFuture.get();
         } else {
             throw new TransportException("channel not active. request id:"+request.getRequestId());
@@ -114,16 +118,59 @@ public class NettyClientImpl implements NettyClient {
 
     @Override
     public ResponseFuture invokeAsync(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
-        return null;
+        Channel channel = getChannel(address);
+        if (channel != null && channel.isActive()) {
+
+            final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeoutInMillis);
+            this.responseFutureMap.put(request.getRequestId(), rpcFuture);
+            //写数据
+            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+
+                    if (future.isSuccess()) {
+                        logger.info("send success, request id:{}", request.getRequestId());
+                    }
+                }
+            });
+            return rpcFuture;
+        } else {
+            throw new TransportException("channel not active. request id:"+request.getRequestId());
+        }
     }
 
     @Override
     public void invokeOneway(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
+        Channel channel = getChannel(address);
+        if (channel != null && channel.isActive()) {
+            //写数据
+            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
 
+                    if (future.isSuccess()) {
+                        logger.info("send success, request id:{}", request.getRequestId());
+                    } else {
+                        logger.info("send failure, request id:{}", request.getRequestId());
+                    }
+                }
+            });
+        } else {
+            throw new TransportException("channel not active. request id:"+request.getRequestId());
+        }
     }
 
     @Override
     public void shutdown() {
+        if(!initialized){
+            logger.warn("NettyClient not initialized, no need to close");
+            return;
+        }
+        if(destroyed) {
+            logger.warn("NettyClient has closed");
+            return;
+        }
+        destroyed = true;
         this.scheduledExecutorService.shutdown();
         this.group.shutdownGracefully();
     }

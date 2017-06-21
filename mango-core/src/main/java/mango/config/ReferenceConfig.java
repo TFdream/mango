@@ -117,6 +117,10 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     }
 
     protected void destroy0() throws Exception {
-        invoker.destroy();
+        proxy = null;
+        if(invoker!=null) {
+            invoker.destroy();
+        }
+        invoker = null;
     }
 }

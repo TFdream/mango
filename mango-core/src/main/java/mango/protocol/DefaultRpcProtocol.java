@@ -10,14 +10,14 @@ import mango.exception.RpcFrameworkException;
 import mango.registry.NotifyListener;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
-import mango.rpc.*;
+import mango.rpc.Exporter;
+import mango.rpc.Invoker;
+import mango.rpc.MessageRouter;
+import mango.rpc.Provider;
 import mango.transport.NettyClient;
 import mango.transport.NettyClientImpl;
 import mango.transport.NettyServer;
 import mango.transport.NettyServerImpl;
-import mango.util.MangoFrameworkUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,61 +29,18 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Ricky Fung
  */
-public class DefaultRpcProtocol implements Protocol {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    protected ConcurrentHashMap<String, Exporter<?>> exporterMap = new ConcurrentHashMap<>();
+public class DefaultRpcProtocol extends AbstractProtocol {
 
     private ConcurrentHashMap<String, NettyServer> ipPort2Server = new ConcurrentHashMap<>();
     // 多个service可能在相同端口进行服务暴露，因此来自同个端口的请求需要进行路由以找到相应的服务，同时不在该端口暴露的服务不应该被找到
     private Map<String, MessageRouter> ipPort2RequestRouter = new HashMap<String, MessageRouter>();
 
     @Override
-    public <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl) {
-        if (url == null) {
-            throw new RpcFrameworkException(this.getClass().getSimpleName() + " refer Error: url is null");
-        }
-        if (clz == null) {
-            throw new RpcFrameworkException(this.getClass().getSimpleName() + " refer Error: class is null, url=" + url);
-        }
-        Invoker<T> invoker = createInvoker(clz, url, serviceUrl);
-        invoker.init();
-
-        logger.info(this.getClass().getSimpleName() + " refer Success: url=" + url);
-        return invoker;
-    }
-
-    @Override
-    public <T> Exporter<T> export(Provider<T> provider, URL url) {
-        if (url == null) {
-            throw new RpcFrameworkException(this.getClass().getSimpleName() + " export Error: url is null");
-        }
-
-        if (provider == null) {
-            throw new RpcFrameworkException(this.getClass().getSimpleName() + " export Error: provider is null, url=" + url);
-        }
-
-        String protocolKey = MangoFrameworkUtils.getProtocolKey(url);
-
-        synchronized (exporterMap) {
-            Exporter<T> exporter = (Exporter<T>) exporterMap.get(protocolKey);
-
-            if (exporter != null) {
-                throw new RpcFrameworkException(this.getClass().getSimpleName() + " export Error: service already exist, url=" + url);
-            }
-
-            exporter = createExporter(provider, url);
-            exporter.init();
-            exporterMap.put(protocolKey, exporter);
-            logger.info(this.getClass().getSimpleName() + " export success: url=" + url);
-            return exporter;
-        }
-    }
-
     protected <T> Invoker<T> createInvoker(Class<T> clz, URL url, URL serviceUrl) {
         return new DefaultRpcInvoker<T>(clz, url, serviceUrl);
     }
 
+    @Override
     protected <T> Exporter<T> createExporter(Provider<T> provider, URL url) {
         return new DefaultRpcExporter<T>(provider, url);
     }
@@ -158,7 +115,11 @@ public class DefaultRpcProtocol implements Protocol {
 
         @Override
         public void destroy() {
-            client.shutdown();
+            try{
+                client.shutdown();
+            } catch (Exception e){
+                logger.error("reference destroy error", e);
+            }
         }
 
         @Override

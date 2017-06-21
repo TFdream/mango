@@ -81,7 +81,7 @@ public class DemoServiceImpl implements DemoService {
 }
 ```
 
-rpc-provider.xml
+mango-server.xml
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -115,13 +115,14 @@ public class ServerApp {
 
     public static void main( String[] args ) {
 
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:rpc-provider.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:mango-server.xml");
         System.out.println("server start...");
     }
 }
 ```
 
 4. Create and start RPC Client.
+mango-client.xml
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -155,7 +156,7 @@ public class ClientApp {
 
     public static void main( String[] args ) {
 
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:rpc-consumer.xml");
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:mango-client.xml");
 
         DemoService service = (DemoService) ctx.getBean("demoService");
 
