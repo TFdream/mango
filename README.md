@@ -93,6 +93,7 @@ mango-server.xml
     <context:annotation-config/>
     <context:component-scan base-package="mango.demo"/>
 
+    <mango:application name="mango-server" />
     <mango:protocol name="mango" port="21918"/>
 
     <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="2000" session-timeout="60000" />
@@ -134,7 +135,8 @@ mango-client.xml
     <context:annotation-config/>
     <context:component-scan base-package="mango.demo.client"/>
 
-    <mango:protocol name="mango" port="21918" serialization="hessian"/>
+    <mango:application name="mango-client" />
+    <mango:protocol name="mango" port="21918"/>
 
     <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="5000" />
 
