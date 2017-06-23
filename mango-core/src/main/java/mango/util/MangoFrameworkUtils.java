@@ -27,7 +27,6 @@ public class MangoFrameworkUtils {
         ProtocolConfig pc = new ProtocolConfig();
         pc.setId(Constants.FRAMEWORK_NAME);
         pc.setName(Constants.FRAMEWORK_NAME);
-        pc.setHost(NetUtils.getLocalAddress().getHostAddress());
         pc.setPort(Constants.DEFAULT_PORT);
         return pc;
     }

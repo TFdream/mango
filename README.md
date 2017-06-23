@@ -25,7 +25,7 @@ Mango is a high-performance, open-source Java RPC framework.
         <version>1.0.0</version>
     </dependency>
     
-    <!--集成Spring -->
+    <!-- dependencies blow were only needed for spring integrated -->
     <dependency>
         <groupId>com.mindflow</groupId>
         <artifactId>mango-springsupport</artifactId>
@@ -98,7 +98,7 @@ mango-server.xml
 
     <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="2000" session-timeout="60000" />
 
-    <!--暴露服务 -->
+    <!--export services-->
     <mango:service interface="mango.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />
     <mango:service interface="mango.demo.service.UserService" ref="userService" version="1.0.0" />
 
@@ -140,7 +140,7 @@ mango-client.xml
 
     <mango:registry protocol="zookeeper" address="10.141.5.49:2181" connect-timeout="5000" />
 
-    <!--引用服务-->
+    <!--refer services-->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />
     <mango:reference id="userService" interface="mango.demo.service.UserService"/>
 
@@ -162,7 +162,7 @@ public class ClientApp {
 
         List<String> hobbies = new ArrayList<>();
         hobbies.add("NBA");
-        hobbies.add("读书");
+        hobbies.add("Reading");
         Map<String, String> map = service.introduce("hh", hobbies);
         System.out.println("map:"+map);
     }

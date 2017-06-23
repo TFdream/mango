@@ -2,11 +2,13 @@ package mango.config;
 
 import mango.common.URL;
 import mango.common.URLParam;
+import mango.exception.RpcFrameworkException;
 import mango.registry.Registry;
 import mango.util.Constants;
 import mango.util.NetUtils;
 import mango.util.StringUtils;
 
+import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -67,6 +69,30 @@ public class AbstractInterfaceConfig extends AbstractConfig {
             }
         }
         return registryList;
+    }
+
+    protected String getHostAddress(ProtocolConfig protocol) {
+        String hostAddress = protocol.getHost();
+        if (StringUtils.isBlank(hostAddress)) {
+            hostAddress = getLocalHostAddress();
+        }
+        return hostAddress;
+    }
+
+    protected Integer getProtocolPort(ProtocolConfig protocol) {
+        Integer port = protocol.getPort();
+        if(port==null || port<1) {
+            port = Constants.DEFAULT_PORT;
+        }
+        return port;
+    }
+
+    protected String getLocalHostAddress() {
+        InetAddress address = NetUtils.getLocalAddress();
+        if(address==null || StringUtils.isBlank(address.getHostAddress())){
+            throw new RpcFrameworkException("retrieve local host address failure, please setting by <mango:protocol host='...' />");
+        }
+        return address.getHostAddress();
     }
 
     protected void checkApplication() {

@@ -19,7 +19,7 @@
 
     <mango:registry protocol="zookeeper" address="127.0.0.1:2181" connect-timeout="5000" />
 
-    <!--引用服务-->
+    <!--refer services -->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />
     <mango:reference id="userService" interface="mango.demo.service.UserService"/>
     <mango:reference id="fooService" interface="mango.demo.service.FooService"/>

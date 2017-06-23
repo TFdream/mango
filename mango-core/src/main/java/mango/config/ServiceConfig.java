@@ -3,10 +3,9 @@ package mango.config;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
-import mango.rpc.Exporter;
 import mango.rpc.ConfigHandler;
+import mango.rpc.Exporter;
 import mango.util.Constants;
-import mango.util.NetUtils;
 import mango.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,6 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
     private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
     private Class<T> interfaceClass;
     private T ref;
-    private String host;
 
     protected synchronized void export() {
         if (exported) {
@@ -73,10 +71,8 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
             protocolName = URLParam.protocol.getValue();
         }
 
-        String hostAddress = host;
-        if (StringUtils.isBlank(hostAddress)) {
-            hostAddress = NetUtils.getLocalAddress().getHostAddress();
-        }
+        Integer port = getProtocolPort(protocol);
+        String hostAddress = getHostAddress(protocol);
 
         Map<String, String> map = new HashMap<String, String>();
         map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
@@ -87,7 +83,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
         map.put(URLParam.side.getName(), Constants.PROVIDER);
         map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
 
-        URL serviceUrl = new URL(protocolName, hostAddress, protocol.getPort(), interfaceClass.getName(), map);
+        URL serviceUrl = new URL(protocolName, hostAddress, port, interfaceClass.getName(), map);
 
         ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
         exporters.add(configHandler.export(interfaceClass, ref, serviceUrl, registryUrls));
@@ -99,14 +95,6 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
     public void setRef(T ref) {
         this.ref = ref;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
     }
 
     public Class<T> getInterfaceClass() {
@@ -124,4 +112,5 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
     protected void destroy0() throws Exception {
 
     }
+
 }

@@ -8,10 +8,8 @@ import mango.proxy.ReferenceInvocationHandler;
 import mango.rpc.ConfigHandler;
 import mango.rpc.Invoker;
 import mango.util.Constants;
-import mango.util.NetUtils;
 import mango.util.StringUtils;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +68,9 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
         URL regUrl = registryUrls.get(0);
 
         ProtocolConfig protocolConfig = protocols.get(0);
-        Integer port = protocolConfig.getPort();
-        if(port==null) {
-            port = Constants.DEFAULT_PORT;
-        }
-        InetAddress localAddress = NetUtils.getLocalAddress();
+
+        Integer port = getProtocolPort(protocolConfig);
+        String hostAddress = getHostAddress(protocolConfig);
 
         Map<String, String> map = new HashMap<>();
         map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
@@ -87,10 +83,10 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
         map.put(URLParam.requestTimeout.getName(), String.valueOf(getTimeout()));
         map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
 
-        URL refUrl = new URL(URLParam.codec.getValue(), localAddress.getHostAddress(), port, interfaceClass.getName(), map);
+        URL serviceUrl = new URL(URLParam.codec.getValue(), hostAddress, port, interfaceClass.getName(), map);
 
         ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
-        invoker = configHandler.refer(interfaceClass, regUrl, refUrl);
+        invoker = configHandler.refer(interfaceClass, regUrl, serviceUrl);
         return invoker;
     }
 
