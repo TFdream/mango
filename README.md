@@ -1,4 +1,6 @@
 # Mango
+[![Build Status](https://travis-ci.org/TiFG/mango.svg?branch=master)](https://travis-ci.org/TiFG/mango)
+
 ## Overview
 Mango is a high-performance, open-source java RPC framework. 
 
