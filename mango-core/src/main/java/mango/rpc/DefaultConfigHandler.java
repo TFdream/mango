@@ -1,9 +1,15 @@
 package mango.rpc;
 
+import mango.cluster.Cluster;
+import mango.cluster.DefaultCluster;
+import mango.cluster.ha.HaStrategy;
+import mango.cluster.loadbalance.LoadBalance;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
+import mango.proxy.ProxyFactory;
+import mango.proxy.ReferenceInvocationHandler;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
 
@@ -17,10 +23,23 @@ import java.util.List;
 public class DefaultConfigHandler implements ConfigHandler {
 
     @Override
-    public <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl) {
-        String protocolName = serviceUrl.getParameter(URLParam.protocol.getName(), URLParam.protocol.getValue());
-        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName);
-        return protocol.refer(clz, url, serviceUrl);
+    public <T> Cluster<T> buildCluster(Class<T> interfaceClass, URL refUrl, List<URL> registryUrls) {
+        DefaultCluster<T> cluster = new DefaultCluster(interfaceClass, refUrl, registryUrls);
+        String loadBalanceName = refUrl.getParameter(URLParam.loadBalance.getName(), URLParam.loadBalance.getValue());
+        String haStrategyName = refUrl.getParameter(URLParam.haStrategy.getName(), URLParam.haStrategy.getValue());
+        LoadBalance<T> loadBalance = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadBalanceName);
+        HaStrategy<T> ha = ExtensionLoader.getExtensionLoader(HaStrategy.class).getExtension(haStrategyName);
+        cluster.setLoadBalance(loadBalance);
+        cluster.setHaStrategy(ha);
+
+        cluster.init();
+        return cluster;
+    }
+
+    @Override
+    public <T> T refer(Class<T> interfaceClass, List<Cluster<T>> cluster, String proxyType) {
+        ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getExtension(proxyType);
+        return (T) proxyFactory.getProxy(interfaceClass, new ReferenceInvocationHandler<>(interfaceClass, cluster));
     }
 
     @Override

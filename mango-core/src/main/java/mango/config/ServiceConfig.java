@@ -72,7 +72,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
         }
 
         Integer port = getProtocolPort(protocol);
-        String hostAddress = getHostAddress(protocol);
+        String hostAddress = getLocalHostAddress(protocol);
 
         Map<String, String> map = new HashMap<String, String>();
         map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());

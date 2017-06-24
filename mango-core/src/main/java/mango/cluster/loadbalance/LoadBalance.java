@@ -1,8 +1,8 @@
 package mango.cluster.loadbalance;
 
-import mango.common.URL;
+import mango.core.Request;
 import mango.core.extension.SPI;
-
+import mango.rpc.Reference;
 import java.util.List;
 
 /**
@@ -11,7 +11,9 @@ import java.util.List;
  * @author Ricky Fung
  */
 @SPI("random")
-public interface LoadBalance {
+public interface LoadBalance<T> {
 
-    URL select(List<URL> urls);
+    void setReferences(List<Reference<T>> references);
+
+    Reference<T> select(Request request);
 }

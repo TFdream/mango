@@ -81,7 +81,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements Closeable {
     }
 
     @Override
-    protected void subscribeService(final URL url, final NotifyListener listener) {
+    protected void doSubscribe(final URL url, final NotifyListener listener) {
         try {
             clientLock.lock();
 
@@ -118,7 +118,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements Closeable {
     }
 
     @Override
-    protected void unsubscribeService(URL url, NotifyListener listener) {
+    protected void doUnsubscribe(URL url, NotifyListener listener) {
         try {
             clientLock.lock();
             Map<NotifyListener, IZkChildListener> childChangeListeners = serviceListeners.get(url);

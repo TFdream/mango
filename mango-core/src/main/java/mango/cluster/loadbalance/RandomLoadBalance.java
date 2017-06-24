@@ -1,7 +1,7 @@
 package mango.cluster.loadbalance;
 
-import mango.common.URL;
-
+import mango.core.Request;
+import mango.rpc.Reference;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,11 +10,17 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author Ricky Fung
  */
-public class RandomLoadBalance implements LoadBalance {
+public class RandomLoadBalance<T> implements LoadBalance<T> {
+    private volatile List<Reference<T>> references;
 
     @Override
-    public URL select(List<URL> urls) {
-        int idx = (int) (ThreadLocalRandom.current().nextDouble() * urls.size());
-        return urls.get(idx);
+    public void setReferences(List<Reference<T>> references) {
+        this.references = references;
+    }
+
+    @Override
+    public Reference select(Request request) {
+        int idx = (int) (ThreadLocalRandom.current().nextDouble() * references.size());
+        return references.get(idx);
     }
 }

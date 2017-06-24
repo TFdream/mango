@@ -1,11 +1,11 @@
 package mango.proxy;
 
+import mango.cluster.Cluster;
 import mango.common.URLParam;
 import mango.core.DefaultRequest;
 import mango.core.Response;
 import mango.exception.RpcFrameworkException;
 import mango.exception.RpcServiceException;
-import mango.rpc.Invoker;
 import mango.util.Constants;
 import mango.util.ExceptionUtil;
 import mango.util.RequestIdGenerator;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,10 +26,12 @@ import java.util.Map;
 public class ReferenceInvocationHandler<T> implements InvocationHandler {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private Invoker<T> invoker;
+    private List<Cluster<T>> clusters;
+    private Class<T> clz;
 
-    public ReferenceInvocationHandler(Invoker<T> invoker) {
-        this.invoker = invoker;
+    public ReferenceInvocationHandler(Class<T> clz, List<Cluster<T>> clusters) {
+        this.clz = clz;
+        this.clusters = clusters;
     }
 
     @Override
@@ -48,33 +51,38 @@ public class ReferenceInvocationHandler<T> implements InvocationHandler {
         request.setParameterTypes(method.getParameterTypes());
         request.setArguments(args);
         request.setType(Constants.REQUEST_SYNC);
-        //调用参数
-        request.setAttachment(URLParam.version.getName(), invoker.getServiceUrl().getVersion());
-        request.setAttachment(URLParam.group.getName(), invoker.getServiceUrl().getGroup());
+
 
         boolean throwException = checkMethodExceptionSignature(method);
-        try {
-            Response resp = invoker.call(request);
-            return getValue(resp);
-        } catch (RuntimeException e) {
-            if (ExceptionUtil.isBizException(e)) {
-                Throwable t = e.getCause();
-                if (t != null && t instanceof Exception) {
-                    throw t;
+
+        for (Cluster<T> cluster : clusters) {
+            //调用参数
+            request.setAttachment(URLParam.version.getName(), cluster.getUrl().getVersion());
+            request.setAttachment(URLParam.group.getName(), cluster.getUrl().getGroup());
+            try {
+                Response resp = cluster.call(request);
+                return getValue(resp);
+            } catch (RuntimeException e) {
+                if (ExceptionUtil.isBizException(e)) {
+                    Throwable t = e.getCause();
+                    if (t != null && t instanceof Exception) {
+                        throw t;
+                    } else {
+                        String msg =
+                                t == null ? "biz exception cause is null" : ("biz exception cause is throwable error:" + t.getClass()
+                                        + ", errmsg:" + t.getMessage());
+                        throw new RpcServiceException(msg);
+                    }
+                } else if (!throwException) {
+                    logger.warn(this.getClass().getSimpleName()+" invoke false, so return default value: uri=" + cluster.getUrl().getUri(), e);
+                    return getDefaultReturnValue(method.getReturnType());
                 } else {
-                    String msg =
-                            t == null ? "biz exception cause is null" : ("biz exception cause is throwable error:" + t.getClass()
-                                    + ", errmsg:" + t.getMessage());
-                    throw new RpcServiceException(msg);
+                    logger.error(this.getClass().getSimpleName()+" invoke Error: uri=" + cluster.getUrl().getUri(), e);
+                    throw e;
                 }
-            } else if (!throwException) {
-                logger.warn(this.getClass().getSimpleName()+" invoke false, so return default value: uri=" + invoker.getServiceUrl().getUri(), e);
-                return getDefaultReturnValue(method.getReturnType());
-            } else {
-                logger.error(this.getClass().getSimpleName()+" invoke Error: uri=" + invoker.getServiceUrl().getUri(), e);
-                throw e;
             }
         }
+        throw new RpcServiceException("Reference call Error: cluster not exist, interface=" + clz.getName());
     }
 
     private boolean checkMethodExceptionSignature(Method method) {

@@ -2,10 +2,7 @@ package mango.protocol;
 
 import mango.common.URL;
 import mango.exception.RpcFrameworkException;
-import mango.rpc.Exporter;
-import mango.rpc.Invoker;
-import mango.rpc.Protocol;
-import mango.rpc.Provider;
+import mango.rpc.*;
 import mango.util.MangoFrameworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,18 +20,18 @@ public abstract class AbstractProtocol implements Protocol {
     protected ConcurrentHashMap<String, Exporter<?>> exporterMap = new ConcurrentHashMap<>();
 
     @Override
-    public <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl) {
+    public <T> Reference<T> refer(Class<T> clz, URL url, URL serviceUrl) {
         if (url == null) {
             throw new RpcFrameworkException(this.getClass().getSimpleName() + " refer Error: url is null");
         }
         if (clz == null) {
             throw new RpcFrameworkException(this.getClass().getSimpleName() + " refer Error: class is null, url=" + url);
         }
-        Invoker<T> invoker = createInvoker(clz, url, serviceUrl);
-        invoker.init();
+        Reference<T> reference = createReference(clz, url, serviceUrl);
+        reference.init();
 
-        logger.info(this.getClass().getSimpleName() + " refer Success: url=" + url);
-        return invoker;
+        logger.info(this.getClass().getSimpleName() + " refer service:{} success url:{}", clz.getName(), url);
+        return reference;
     }
 
     @Override
@@ -64,7 +61,7 @@ public abstract class AbstractProtocol implements Protocol {
         }
     }
 
-    protected abstract <T> Invoker<T> createInvoker(Class<T> clz, URL url, URL serviceUrl);
+    protected abstract <T> Reference<T> createReference(Class<T> clz, URL url, URL serviceUrl);
 
     protected abstract <T> Exporter<T> createExporter(Provider<T> provider, URL url);
 }

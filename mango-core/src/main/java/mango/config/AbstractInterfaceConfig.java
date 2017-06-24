@@ -71,7 +71,7 @@ public class AbstractInterfaceConfig extends AbstractConfig {
         return registryList;
     }
 
-    protected String getHostAddress(ProtocolConfig protocol) {
+    protected String getLocalHostAddress(ProtocolConfig protocol) {
         String hostAddress = protocol.getHost();
         if (StringUtils.isBlank(hostAddress)) {
             hostAddress = getLocalHostAddress();
@@ -90,7 +90,7 @@ public class AbstractInterfaceConfig extends AbstractConfig {
     protected String getLocalHostAddress() {
         InetAddress address = NetUtils.getLocalAddress();
         if(address==null || StringUtils.isBlank(address.getHostAddress())){
-            throw new RpcFrameworkException("retrieve local host address failure, please setting by <mango:protocol host='...' />");
+            throw new RpcFrameworkException("retrieve local host address failure. Please config <mango:protocol host='...' />");
         }
         return address.getHostAddress();
     }

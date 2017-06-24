@@ -1,15 +1,14 @@
 package mango.config;
 
+import mango.cluster.Cluster;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
-import mango.proxy.ProxyFactory;
-import mango.proxy.ReferenceInvocationHandler;
 import mango.rpc.ConfigHandler;
-import mango.rpc.Invoker;
 import mango.util.Constants;
 import mango.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     protected transient volatile T proxy;
 
     private transient volatile boolean initialized;
-    private Invoker<T> invoker;
+    private List<Cluster<T>> clusters;
 
     public T get() {
         if (proxy == null) {
@@ -39,7 +38,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
         if (initialized) {
             return;
         }
-        initialized = true;
+
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<mango:reference interface=\"\" /> interface not allow null!");
         }
@@ -50,12 +49,12 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
             throw new IllegalStateException("reference class not found", e);
         }
 
-        this.invoker = createInvoker();
+        initProxy();
 
-        proxy = createProxy(invoker);
+        initialized = true;
     }
 
-    private Invoker<T> createInvoker() {
+    private void initProxy() {
         if(!interfaceClass.isInterface()) {
             throw new IllegalArgumentException("<mango:reference interface=\"\" /> is not interface!");
         }
@@ -65,35 +64,32 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
             throw new IllegalStateException("Should set registry config for reference:" + interfaceClass.getName());
         }
 
-        URL regUrl = registryUrls.get(0);
-
-        ProtocolConfig protocolConfig = protocols.get(0);
-
-        Integer port = getProtocolPort(protocolConfig);
-        String hostAddress = getHostAddress(protocolConfig);
-
-        Map<String, String> map = new HashMap<>();
-        map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
-        map.put(URLParam.registryProtocol.getName(), regUrl.getProtocol());
-        map.put(URLParam.registryAddress.getName(), regUrl.getParameter(URLParam.registryAddress.getName()));
-        map.put(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocolConfig.getSerialization()) ? protocolConfig.getSerialization(): URLParam.serialization.getValue());
-        map.put(URLParam.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParam.version.getValue());
-        map.put(URLParam.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParam.group.getValue());
-        map.put(URLParam.side.getName(), Constants.CONSUMER);
-        map.put(URLParam.requestTimeout.getName(), String.valueOf(getTimeout()));
-        map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
-
-        URL serviceUrl = new URL(URLParam.codec.getValue(), hostAddress, port, interfaceClass.getName(), map);
-
         ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
-        invoker = configHandler.refer(interfaceClass, regUrl, serviceUrl);
-        return invoker;
-    }
 
-    private T createProxy(Invoker<T> invoker) {
-        String proxyType = invoker.getServiceUrl().getParameter(URLParam.proxyType.getName(), URLParam.proxyType.getValue());
-        ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getExtension(proxyType);
-        return (T) proxyFactory.getProxy(interfaceClass, new ReferenceInvocationHandler<>(invoker));
+        clusters = new ArrayList<>(protocols.size());
+        String proxyType = null;
+        for(ProtocolConfig protocol : protocols) {
+
+            Map<String, String> map = new HashMap<>();
+            map.put(URLParam.application.getName(), StringUtils.isNotEmpty(application.getName()) ? application.getName() : URLParam.application.getValue());
+            map.put(URLParam.serialization.getName(), StringUtils.isNotEmpty(protocol.getSerialization()) ? protocol.getSerialization(): URLParam.serialization.getValue());
+            map.put(URLParam.version.getName(), StringUtils.isNotEmpty(version) ? version : URLParam.version.getValue());
+            map.put(URLParam.group.getName(), StringUtils.isNotEmpty(group) ? group : URLParam.group.getValue());
+            map.put(URLParam.side.getName(), Constants.CONSUMER);
+            map.put(URLParam.requestTimeout.getName(), String.valueOf(getTimeout()));
+            map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+
+            String hostAddress = getLocalHostAddress(protocol);
+            Integer port = getProtocolPort(protocol);
+
+            URL refUrl = new URL(protocol.getName(), hostAddress, port, interfaceClass.getName(), map);
+
+            clusters.add(configHandler.buildCluster(interfaceClass, refUrl, registryUrls));
+
+            proxyType = refUrl.getParameter(URLParam.proxyType.getName(), URLParam.proxyType.getValue());
+        }
+
+        this.proxy = configHandler.refer(interfaceClass, clusters, proxyType);
     }
 
     public T getProxy() {
@@ -113,10 +109,11 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
     }
 
     protected void destroy0() throws Exception {
-        proxy = null;
-        if(invoker!=null) {
-            invoker.destroy();
+        if (clusters != null) {
+            for (Cluster<T> cluster : clusters) {
+                cluster.destroy();
+            }
         }
-        invoker = null;
+        proxy = null;
     }
 }

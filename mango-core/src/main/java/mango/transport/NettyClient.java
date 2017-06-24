@@ -10,18 +10,15 @@ import mango.exception.TransportException;
  *
  * @author Ricky Fung
  */
-public interface NettyClient {
+public interface NettyClient extends Endpoint {
 
-    void start();
-
-    Response invokeSync(String address, final Request request, final long timeoutInMillis)
+    Response invokeSync(final Request request)
             throws InterruptedException, TransportException;
 
-    ResponseFuture invokeAsync(String address, final Request request, final long timeoutInMillis)
+    ResponseFuture invokeAsync(final Request request)
             throws InterruptedException, TransportException;
 
-    void invokeOneway(String address, final Request request, final long timeoutInMillis)
+    void invokeOneway(final Request request)
             throws InterruptedException, TransportException;
 
-    void shutdown();
 }

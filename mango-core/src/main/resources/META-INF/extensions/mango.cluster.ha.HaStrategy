@@ -1,0 +1,2 @@
+failfast=mango.cluster.ha.FailfastHaStrategy
+failover=mango.cluster.ha.FailoverHaStrategy

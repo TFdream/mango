@@ -35,6 +35,7 @@ public enum URLParam {
     bufferSize("buffer_size", 1024*16),
 
     loadBalance("loadbalance", "random"),
+    haStrategy("haStrategy", "failfast"),
 
     retries("retries", 0),
 

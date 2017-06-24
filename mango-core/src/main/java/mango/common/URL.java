@@ -120,6 +120,29 @@ public class URL {
         }
     }
 
+    public boolean canServe(URL refUrl) {
+        if (refUrl == null || !this.getPath().equals(refUrl.getPath())) {
+            return false;
+        }
+
+        if (!protocol.equals(refUrl.protocol)) {
+            return false;
+        }
+
+        String version = getParameter(URLParam.version.getName(), URLParam.version.getValue());
+        String refVersion = refUrl.getParameter(URLParam.version.getName(), URLParam.version.getValue());
+        if (!version.equals(refVersion)) {
+            return false;
+        }
+        // check serialize
+        String serialize = getParameter(URLParam.serialization.getName(), URLParam.serialization.getValue());
+        String refSerialize = refUrl.getParameter(URLParam.serialization.getName(), URLParam.serialization.getValue());
+        if (!serialize.equals(refSerialize)) {
+            return false;
+        }
+        return true;
+    }
+
     public static URL parse(String url) {
         if (StringUtils.isBlank(url)) {
             throw new RpcFrameworkException("url is empty");

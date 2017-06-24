@@ -1,5 +1,6 @@
 package mango.rpc;
 
+import mango.cluster.Cluster;
 import mango.common.URL;
 import mango.core.extension.SPI;
 import mango.util.Constants;
@@ -14,15 +15,16 @@ import java.util.List;
 @SPI(Constants.DEFAULT_VALUE)
 public interface ConfigHandler {
 
+    <T> Cluster<T> buildCluster(Class<T> interfaceClass, URL refUrl, List<URL> registryUrls);
+
     /**
      * 引用服务
-     * @param clz
-     * @param url
-     * @param serviceUrl
+     * @param interfaceClass
+     * @param cluster
      * @param <T>
      * @return
      */
-    <T> Invoker<T> refer(Class<T> clz, URL url, URL serviceUrl);
+    <T> T refer(Class<T> interfaceClass, List<Cluster<T>> cluster, String proxyType);
 
     /**
      * 暴露服务

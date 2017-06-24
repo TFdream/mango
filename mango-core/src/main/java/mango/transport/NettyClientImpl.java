@@ -6,17 +6,16 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import mango.codec.Codec;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.*;
-import mango.core.extension.ExtensionLoader;
+import mango.exception.RpcFrameworkException;
 import mango.exception.TransportException;
 import mango.util.Constants;
-import mango.util.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,8 +30,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Ricky Fung
  */
-public class NettyClientImpl implements NettyClient {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+public class NettyClientImpl extends AbstractClient {
 
     private EventLoopGroup group = new NioEventLoopGroup();
     private Bootstrap b = new Bootstrap();
@@ -40,33 +38,48 @@ public class NettyClientImpl implements NettyClient {
     private final ConcurrentHashMap<Long, ResponseFuture> responseFutureMap =
             new ConcurrentHashMap<>(256);
 
-    private final ConcurrentHashMap<String, ChannelWrapper> channelTable =
-            new ConcurrentHashMap<>();
-
-    private volatile boolean initialized;
-    private volatile boolean destroyed;
-
-    private Codec codec;
-
     private ScheduledExecutorService scheduledExecutorService;
+    private int timeout;
 
-    private URL url;
+    private volatile boolean initializing;
+
+    private volatile ChannelWrapper channelWrapper;
 
     public NettyClientImpl(URL url) {
-        this.url = url;
-        codec = ExtensionLoader.getExtensionLoader(Codec.class).getExtension(url.getParameter(URLParam.codec.getName(), URLParam.codec.getValue()));
+        super(url);
+
+        this.remoteAddress = new InetSocketAddress(url.getHost(), url.getPort());
+        this.timeout = url.getIntParameter(URLParam.requestTimeout.getName(), URLParam.requestTimeout.getIntValue());
+
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(5,
+                new DefaultThreadFactory(String.format("%s-%s", Constants.FRAMEWORK_NAME, "future")));
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                scanRpcFutureTable();
+            }
+        }, 0, 5000, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void start() {
-        if(initialized){
-            return;
+    public synchronized boolean open() {
+
+        if(initializing){
+            logger.warn("NettyClient is initializing: url=" + url);
+            return true;
         }
-        initialized = true;
+        initializing = true;
+
+        if(state.isAvailable()){
+            logger.warn("NettyClient has initialized: url=" + url);
+            return true;
+        }
 
         // 最大响应包限制
         final int maxContentLength = url.getIntParameter(URLParam.maxContentLength.getName(),
                 URLParam.maxContentLength.getIntValue());
+
         b.group(group).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -82,22 +95,38 @@ public class NettyClientImpl implements NettyClient {
                     }
                 });
 
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(5,
-                new DefaultThreadFactory(String.format("%s-%s", Constants.FRAMEWORK_NAME, "future")));
+        try {
+            ChannelFuture channelFuture = b.connect(this.remoteAddress).sync();
+            this.channelWrapper = new ChannelWrapper(channelFuture);
+        } catch (InterruptedException e) {
+            logger.error(String.format("NettyClient connect to address:%s failure", this.remoteAddress), e);
+            throw new RpcFrameworkException(String.format("NettyClient connect to address:%s failure"), e);
+        }
 
-        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                scanRpcFutureTable();
-            }
-        }, 0, 5000, TimeUnit.MILLISECONDS);
+        state = ChannelState.AVAILABLE;
+        return true;
     }
 
     @Override
-    public Response invokeSync(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
-        Channel channel = getChannel(address);
+    public boolean isAvailable() {
+        return state.isAvailable();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return state.isClosed();
+    }
+
+    @Override
+    public URL getUrl() {
+        return url;
+    }
+
+    @Override
+    public Response invokeSync(final Request request) throws InterruptedException, TransportException {
+        Channel channel = getChannel();
         if (channel != null && channel.isActive()) {
-            final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeoutInMillis);
+            final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeout);
             this.responseFutureMap.put(request.getRequestId(), rpcFuture);
             //写数据
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
@@ -121,11 +150,11 @@ public class NettyClientImpl implements NettyClient {
     }
 
     @Override
-    public ResponseFuture invokeAsync(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
-        Channel channel = getChannel(address);
+    public ResponseFuture invokeAsync(final Request request) throws InterruptedException, TransportException {
+        Channel channel = getChannel();
         if (channel != null && channel.isActive()) {
 
-            final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeoutInMillis);
+            final ResponseFuture<Response> rpcFuture = new DefaultResponseFuture<>(timeout);
             this.responseFutureMap.put(request.getRequestId(), rpcFuture);
             //写数据
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
@@ -144,8 +173,8 @@ public class NettyClientImpl implements NettyClient {
     }
 
     @Override
-    public void invokeOneway(String address, final Request request, long timeoutInMillis) throws InterruptedException, TransportException {
-        Channel channel = getChannel(address);
+    public void invokeOneway(final Request request) throws InterruptedException, TransportException {
+        Channel channel = getChannel();
         if (channel != null && channel.isActive()) {
             //写数据
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
@@ -165,18 +194,27 @@ public class NettyClientImpl implements NettyClient {
     }
 
     @Override
-    public void shutdown() {
-        if(!initialized){
-            logger.warn("NettyClient not initialized, no need to close");
+    public void close() {
+        close(0);
+    }
+
+    @Override
+    public synchronized void close(int timeout) {
+
+        if(state.isClosed()){
+            logger.info("NettyClient close fail: already close, url={}", url.getUri());
             return;
         }
-        if(destroyed) {
-            logger.warn("NettyClient has closed");
-            return;
+
+        try {
+            this.scheduledExecutorService.shutdown();
+            this.group.shutdownGracefully();
+
+            state = ChannelState.CLOSED;
+        } catch (Exception e) {
+            logger.error("NettyClient close Error: url=" + url.getUri(), e);
         }
-        destroyed = true;
-        this.scheduledExecutorService.shutdown();
-        this.group.shutdownGracefully();
+
     }
 
     private class NettyClientHandler extends ChannelInboundHandlerAdapter {
@@ -207,32 +245,19 @@ public class NettyClientImpl implements NettyClient {
         }
     }
 
-    private Channel getChannel(String address) throws InterruptedException {
+    private Channel getChannel() throws InterruptedException {
 
-        ChannelWrapper cw = this.channelTable.get(address);
-        if (cw != null && cw.isActive()) {
-            return cw.getChannel();
+        if (this.channelWrapper != null && this.channelWrapper.isActive()) {
+            return this.channelWrapper.getChannel();
         }
 
         synchronized (this){
             // 发起异步连接操作
-            ChannelFuture channelFuture = b.connect(NetUtils.parseSocketAddress(address)).sync();
-            cw = new ChannelWrapper(channelFuture);
-            this.channelTable.put(address, cw);
+            ChannelFuture channelFuture = b.connect(this.remoteAddress).sync();
+            this.channelWrapper = new ChannelWrapper(channelFuture);
         }
 
-        ChannelFuture channelFuture = cw.getChannelFuture();
-        long timeout = 2000;
-        if (channelFuture.awaitUninterruptibly(timeout)) {
-            if (cw.isActive()) {
-                logger.info("createChannel: connect remote host[{}] success, {}", address, channelFuture.toString());
-            } else {
-                logger.warn("createChannel: connect remote host[" + address + "] failed, " + channelFuture.toString(), channelFuture.cause());
-            }
-        } else {
-            logger.warn("createChannel: connect remote host[{}] timeout {}ms, {}", address, timeout, channelFuture);
-        }
-        return cw.getChannel();
+        return this.channelWrapper.getChannel();
     }
 
     /**定时清理超时Future**/

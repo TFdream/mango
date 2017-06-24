@@ -1,26 +1,19 @@
 package mango.protocol;
 
-import mango.cluster.loadbalance.LoadBalance;
 import mango.common.URL;
-import mango.common.URLParam;
 import mango.core.Request;
 import mango.core.Response;
-import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
-import mango.registry.NotifyListener;
-import mango.registry.Registry;
-import mango.registry.RegistryFactory;
 import mango.rpc.Exporter;
-import mango.rpc.Invoker;
 import mango.rpc.MessageRouter;
 import mango.rpc.Provider;
+import mango.rpc.Reference;
 import mango.transport.NettyClient;
 import mango.transport.NettyClientImpl;
 import mango.transport.NettyServer;
 import mango.transport.NettyServerImpl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,8 +29,8 @@ public class DefaultRpcProtocol extends AbstractProtocol {
     private Map<String, MessageRouter> ipPort2RequestRouter = new HashMap<String, MessageRouter>();
 
     @Override
-    protected <T> Invoker<T> createInvoker(Class<T> clz, URL url, URL serviceUrl) {
-        return new DefaultRpcInvoker<T>(clz, url, serviceUrl);
+    protected <T> Reference<T> createReference(Class<T> clz, URL url, URL serviceUrl) {
+        return new DefaultRpcReference<T>(clz, url, serviceUrl);
     }
 
     @Override
@@ -45,16 +38,13 @@ public class DefaultRpcProtocol extends AbstractProtocol {
         return new DefaultRpcExporter<T>(provider, url);
     }
 
-    class DefaultRpcInvoker<T> implements Invoker<T>, NotifyListener {
+    class DefaultRpcReference<T> implements Reference<T> {
         protected Class<T> clz;
         private URL url;
         protected URL serviceUrl;
-
         private NettyClient client;
-        private List<URL> urls; //服务提供者地址
-        private LoadBalance lb;
 
-        public DefaultRpcInvoker(Class<T> clz, URL url, URL serviceUrl) {
+        public DefaultRpcReference(Class<T> clz, URL url, URL serviceUrl) {
             this.clz = clz;
             this.url = url;
             this.serviceUrl = serviceUrl;
@@ -70,12 +60,7 @@ public class DefaultRpcProtocol extends AbstractProtocol {
         @Override
         public Response call(Request request) {
             try {
-                //load-balance
-                URL url = lb.select(urls);
-                String address = String.format("%s:%d", url.getHost(), url.getPort());
-                logger.info("LB select: {}", address);
-                long timeout = url.getIntParameter(URLParam.requestTimeout.getName(), URLParam.requestTimeout.getIntValue());
-                Response resp = client.invokeSync(address, request, timeout);
+                Response resp = client.invokeSync(request);
                 return resp;
             } catch (Exception e) {
                 throw new RpcFrameworkException("invoke exception", e);
@@ -89,34 +74,13 @@ public class DefaultRpcProtocol extends AbstractProtocol {
 
         @Override
         public void init() {
-            String loadbalance = serviceUrl.getParameter(URLParam.loadBalance.getName(), URLParam.loadBalance.getValue());
-            lb = ExtensionLoader.getExtensionLoader(LoadBalance.class).getExtension(loadbalance);
-
-            RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(url.getProtocol());
-            Registry registry;
-            try {
-                registry = registryFactory.getRegistry(url);
-            }catch (Exception e) {
-                throw new RpcFrameworkException("get registry from ["+url.getProtocol()+":"+url.getHost()+"] error", e);
-            }
-            try {
-                this.urls = registry.discover(serviceUrl);
-                if(this.urls==null || this.urls.isEmpty()) {
-                    throw new IllegalStateException("no provider for url:"+url);
-                }
-
-                //订阅服务
-                registry.subscribe(serviceUrl, this);
-            } catch (Exception e) {
-                throw new RpcFrameworkException("Unable discover/subscribe service:"+url.getPath() + " from ["+url.getProtocol()+":"+url.getHost()+"]", e);
-            }
-            client.start();
+            this.client.open();
         }
 
         @Override
         public void destroy() {
             try{
-                client.shutdown();
+                client.close();
             } catch (Exception e){
                 logger.error("reference destroy error", e);
             }
@@ -124,7 +88,7 @@ public class DefaultRpcProtocol extends AbstractProtocol {
 
         @Override
         public boolean isAvailable() {
-            return false;
+            return client.isAvailable();
         }
 
         @Override
@@ -137,10 +101,6 @@ public class DefaultRpcProtocol extends AbstractProtocol {
             return url;
         }
 
-        @Override
-        public void notify(URL registryUrl, List<URL> urls) {
-            logger.info("client notify from %s", registryUrl);
-        }
     }
 
     class DefaultRpcExporter<T> implements Exporter<T> {
@@ -194,7 +154,7 @@ public class DefaultRpcProtocol extends AbstractProtocol {
 
         @Override
         public void unExport() {
-            this.server.shutdown();
+
         }
 
         @Override
@@ -204,12 +164,12 @@ public class DefaultRpcProtocol extends AbstractProtocol {
 
         @Override
         public void destroy() {
-            this.server.shutdown();
+            this.server.close();
         }
 
         @Override
         public boolean isAvailable() {
-            return false;
+            return this.server.isAvailable();
         }
 
         @Override

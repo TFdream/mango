@@ -41,14 +41,22 @@ public abstract class AbstractRegistry implements Registry {
     public void subscribe(URL url, NotifyListener listener) {
         Preconditions.checkNotNull(url);
         Preconditions.checkNotNull(listener);
-        subscribeService(url.clone0(), listener);
+
+        URL urlCopy = url.clone0();
+        doSubscribe(urlCopy, listener);
+
+        //第一次订阅时主动推一次
+        List<URL> urls = doDiscover(urlCopy);
+        if (urls != null && urls.size() > 0) {
+            listener.notify(url, urls);
+        }
     }
 
     @Override
     public void unsubscribe(URL url, NotifyListener listener) {
         Preconditions.checkNotNull(url);
         Preconditions.checkNotNull(listener);
-        unsubscribeService(url.clone0(), listener);
+        doUnsubscribe(url.clone0(), listener);
     }
 
     @Override
@@ -74,9 +82,9 @@ public abstract class AbstractRegistry implements Registry {
 
     protected abstract void doUnregister(URL url);
 
-    protected abstract void subscribeService(URL url, NotifyListener listener);
+    protected abstract void doSubscribe(URL url, NotifyListener listener);
 
-    protected abstract void unsubscribeService(URL url, NotifyListener listener);
+    protected abstract void doUnsubscribe(URL url, NotifyListener listener);
 
     protected abstract List<URL> doDiscover(URL url);
 }

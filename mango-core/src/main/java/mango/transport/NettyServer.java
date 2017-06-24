@@ -5,12 +5,6 @@ package mango.transport;
  *
  * @author Ricky Fung
  */
-public interface NettyServer {
-
-    boolean open();
-
-    boolean isAvailable();
-
-    void shutdown();
+public interface NettyServer extends Endpoint {
 
 }
