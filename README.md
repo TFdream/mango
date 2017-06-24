@@ -102,9 +102,10 @@ mango-server.xml
     <context:component-scan base-package="mango.demo"/>
 
     <mango:application name="mango-server" />
+    
     <mango:protocol name="mango" port="21918"/>
 
-    <mango:registry protocol="zookeeper" address="127.0.0.1:2181" connect-timeout="2000" session-timeout="60000" />
+    <mango:registry protocol="zookeeper" address="localhost:2181"/>
 
     <!--export services-->
     <mango:service interface="mango.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />
@@ -144,9 +145,10 @@ mango-client.xml
     <context:component-scan base-package="mango.demo.client"/>
 
     <mango:application name="mango-client" />
+    
     <mango:protocol name="mango" port="21918"/>
 
-    <mango:registry protocol="zookeeper" address="127.0.0.1:2181" connect-timeout="5000" />
+    <mango:registry protocol="zookeeper" address="localhost:2181"/>
 
     <!--refer services-->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />
