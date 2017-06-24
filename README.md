@@ -11,6 +11,11 @@ Mango is a high-performance, open-source java RPC framework.
 * Supports oneway, synchronous or asynchronous invoking.
 * Easy integrated with Spring Framework 4.x.
 
+## Requirements
+The minimum requirements to run the quick start are:
+* JDK 1.7 or above
+* A java-based project management software like [Maven](https://maven.apache.org/) or [Gradle](http://gradle.org/)
+
 ## Quick Start
 
 ### 1. Synchronous calls

@@ -2,6 +2,7 @@ package mango.demo.client;
 
 import mango.demo.model.User;
 import mango.demo.service.UserService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,12 +22,14 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
+    @Ignore
     public void testInsert() {
 
         System.out.println(userService.insert(new User()));
     }
 
     @Test
+    @Ignore
     public void testGetUsers() {
 
         List<User> users = userService.getUsers(28);

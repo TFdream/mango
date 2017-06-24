@@ -1,6 +1,7 @@
 package mango.demo.client;
 
 import mango.demo.service.DemoService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,18 +23,21 @@ public class DemoServiceTest {
     private DemoService demoService;
 
     @Test
+    @Ignore
     public void testHello() {
 
         demoService.hello("rpc");
     }
 
     @Test
+    @Ignore
     public void testEcho() {
 
         System.out.println("echo:"+demoService.echo("rpc"));
     }
 
     @Test
+    @Ignore
     public void testIntroduce() {
 
         List<String> hobbies = new ArrayList<>();
