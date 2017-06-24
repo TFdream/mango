@@ -1,1 +1,1 @@
-jackson=mango.serializer.jackson.JacksonSerializer
+jackson=mango.serialization.jackson.JacksonSerializer

@@ -1,1 +1,1 @@
-fst=mango.serializer.fst.FstSerializer
+fst=mango.serialization.fst.FstSerializer

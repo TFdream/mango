@@ -1,1 +1,1 @@
-hessian=mango.serializer.hessian.HessianSerializer
+hessian=mango.serialization.hessian.HessianSerializer

@@ -1,1 +1,1 @@
-msgpack=mango.serializer.msgpack.MessagePackSerializer
+msgpack=mango.serialization.msgpack.MessagePackSerializer

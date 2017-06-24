@@ -17,7 +17,7 @@
 
     <mango:protocol name="mango" port="21918" />
 
-    <mango:registry protocol="zookeeper" address="127.0.0.1:2181" connect-timeout="5000" />
+    <mango:registry protocol="zookeeper" address="localhost:2181" connect-timeout="5000" />
 
     <!--refer services -->
     <mango:reference id="demoService" interface="mango.demo.service.DemoService" group="group1" />

@@ -1,1 +1,1 @@
-protostuff=mango.serializer.protostuff.ProtostuffSerializer
+protostuff=mango.serialization.protostuff.ProtostuffSerializer
