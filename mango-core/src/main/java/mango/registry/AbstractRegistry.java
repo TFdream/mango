@@ -46,10 +46,10 @@ public abstract class AbstractRegistry implements Registry {
         doSubscribe(urlCopy, listener);
 
         //第一次订阅时主动推一次
-        List<URL> urls = doDiscover(urlCopy);
-        if (urls != null && urls.size() > 0) {
-            listener.notify(url, urls);
-        }
+//        List<URL> urls = doDiscover(urlCopy);
+//        if (urls != null && urls.size() > 0) {
+//            listener.notify(url, urls);
+//        }
     }
 
     @Override

@@ -121,6 +121,7 @@ public class MangoBeanDefinitionParser implements BeanDefinitionParser {
 
             parseCommonProperty("timeout", null, element, bd, parserContext);
             parseCommonProperty("retries", null, element, bd, parserContext);
+            parseCommonProperty("check", null, element, bd, parserContext);
 
         } else if (ServiceConfigBean.class.equals(beanClass)) {
             MangoNamespaceHandler.serviceConfigDefineNames.add(id);

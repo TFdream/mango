@@ -3,6 +3,7 @@ package mango.cluster;
 import mango.cluster.ha.HaStrategy;
 import mango.cluster.loadbalance.LoadBalance;
 import mango.common.URL;
+import mango.common.URLParam;
 import mango.core.DefaultResponse;
 import mango.core.Request;
 import mango.core.Response;
@@ -40,7 +41,7 @@ public class DefaultCluster<T> implements Cluster<T>, NotifyListener {
 
     private volatile List<Reference<T>> references;
 
-    private ConcurrentHashMap<URL, List<Reference<T>>> registryReferences = new ConcurrentHashMap<URL, List<Reference<T>>>();
+    private ConcurrentHashMap<URL, List<Reference<T>>> registryReferences = new ConcurrentHashMap<>();
 
     private volatile boolean available;
 
@@ -58,12 +59,25 @@ public class DefaultCluster<T> implements Cluster<T>, NotifyListener {
         for (URL ru : registryUrls) {
 
             Registry registry = getRegistry(ru);
+            try {
+                notify(ru, registry.discover(subscribeUrl));
+            } catch (Exception e) {
+                logger.error(String.format("Cluster init discover for the reference:%s, registry:%s", this.url, ru), e);
+            }
             // client 注册自己，同时订阅service列表
             registry.subscribe(subscribeUrl, this);
         }
 
         logger.info("Cluster init over, url:{}, references size:{}", url, references!=null ? references.size():0);
-
+        boolean check = Boolean.parseBoolean(url.getParameter(URLParam.check.getName(), URLParam.check.getValue()));
+        if(CollectionUtil.isEmpty(references)) {
+            logger.warn(String.format("Cluster No service urls for the reference:%s, registries:%s",
+                    this.url, registryUrls));
+            if(check) {
+                throw new RpcFrameworkException(String.format("Cluster No service urls for the reference:%s, registries:%s",
+                        this.url, registryUrls));
+            }
+        }
         available = true;
     }
 
@@ -79,8 +93,10 @@ public class DefaultCluster<T> implements Cluster<T>, NotifyListener {
                 logger.warn(String.format("Unregister or unsubscribe false for url (%s), registry= %s", url, ru), e);
             }
         }
-        for (Reference<T> reference : this.references) {
-            reference.destroy();
+        if(references!=null) {
+            for (Reference<T> reference : this.references) {
+                reference.destroy();
+            }
         }
         available = false;
     }

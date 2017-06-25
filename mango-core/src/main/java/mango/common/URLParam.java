@@ -37,6 +37,7 @@ public enum URLParam {
     loadBalance("loadbalance", "random"),
     haStrategy("haStrategy", "failfast"),
 
+    check("check", true),
     retries("retries", 0),
 
     proxyType("proxy", "jdk"),

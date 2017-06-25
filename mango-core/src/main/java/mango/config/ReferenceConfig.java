@@ -78,6 +78,7 @@ public class ReferenceConfig<T> extends AbstractInterfaceConfig {
             map.put(URLParam.side.getName(), Constants.CONSUMER);
             map.put(URLParam.requestTimeout.getName(), String.valueOf(getTimeout()));
             map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
+            map.put(URLParam.check.getName(), isCheck().toString());
 
             String hostAddress = getLocalHostAddress(protocol);
             Integer port = getProtocolPort(protocol);

@@ -33,6 +33,9 @@ public class AbstractInterfaceConfig extends AbstractConfig {
     // 注册中心的配置列表
     protected List<RegistryConfig> registries;
 
+    // 是否进行check，如果为true，则在监测失败后抛异常
+    protected Boolean check = Boolean.TRUE;
+
     protected List<URL> loadRegistryUrls() {
         List<URL> registryList = new ArrayList<URL>();
         if (registries != null && !registries.isEmpty()) {
@@ -177,4 +180,11 @@ public class AbstractInterfaceConfig extends AbstractConfig {
         this.registries = Collections.singletonList(registry);
     }
 
+    public Boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(Boolean check) {
+        this.check = check;
+    }
 }

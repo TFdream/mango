@@ -22,6 +22,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Test
+    @Ignore
     public void testInsert() {
 
         System.out.println(userService.insert(new User()));
