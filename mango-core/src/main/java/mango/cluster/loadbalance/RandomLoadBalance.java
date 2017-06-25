@@ -1,5 +1,6 @@
 package mango.cluster.loadbalance;
 
+import mango.cluster.LoadBalance;
 import mango.core.Request;
 import mango.rpc.Reference;
 import java.util.List;

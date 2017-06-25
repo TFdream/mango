@@ -2,8 +2,8 @@ package mango.rpc;
 
 import mango.cluster.Cluster;
 import mango.cluster.DefaultCluster;
-import mango.cluster.ha.HaStrategy;
-import mango.cluster.loadbalance.LoadBalance;
+import mango.cluster.HaStrategy;
+import mango.cluster.LoadBalance;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;

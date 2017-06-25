@@ -1,6 +1,7 @@
 package mango.cluster.ha;
 
-import mango.cluster.loadbalance.LoadBalance;
+import mango.cluster.HaStrategy;
+import mango.cluster.LoadBalance;
 import mango.core.Request;
 import mango.core.Response;
 import mango.rpc.Reference;

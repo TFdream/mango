@@ -1,6 +1,5 @@
-package mango.cluster.ha;
+package mango.cluster;
 
-import mango.cluster.loadbalance.LoadBalance;
 import mango.core.Request;
 import mango.core.Response;
 import mango.core.extension.SPI;

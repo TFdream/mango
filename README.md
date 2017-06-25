@@ -6,9 +6,10 @@ Mango is a high-performance, open-source java RPC framework.
 
 ## Features
 * Supports various serialization protocol, like [protostuff](http://protostuff.io), Kryo, Hessian, msgpack, Jackson, Fastjson.
-* Netty 4.1 as transport layer framework.
+* Supports advanced features like load-balance(random, Round-Robin), HA strategy(Failfast, Failover).
 * Supports service discovery services like ZooKeeper or Consul.
 * Supports oneway, synchronous or asynchronous invoking.
+* Supports SPI extension.
 * Easy integrated with Spring Framework 4.x.
 
 ## Requirements

@@ -1,7 +1,5 @@
 package mango.cluster;
 
-import mango.cluster.ha.HaStrategy;
-import mango.cluster.loadbalance.LoadBalance;
 import mango.core.extension.SPI;
 import mango.core.extension.Scope;
 import mango.rpc.Caller;

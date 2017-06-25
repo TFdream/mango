@@ -1,4 +1,4 @@
-package mango.cluster.loadbalance;
+package mango.cluster;
 
 import mango.core.Request;
 import mango.core.extension.SPI;

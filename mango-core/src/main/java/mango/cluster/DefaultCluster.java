@@ -1,7 +1,5 @@
 package mango.cluster;
 
-import mango.cluster.ha.HaStrategy;
-import mango.cluster.loadbalance.LoadBalance;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.DefaultResponse;
