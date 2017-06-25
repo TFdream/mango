@@ -4,9 +4,9 @@ import mango.common.URL;
 import mango.core.DefaultResponse;
 import mango.core.Request;
 import mango.core.Response;
+import mango.exception.RpcBizException;
 import mango.exception.RpcFrameworkException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -31,10 +31,7 @@ public class DefaultProvider<T> extends AbstractProvider<T> {
         DefaultResponse response = new DefaultResponse();
         response.setRequestId(request.getRequestId());
 
-        long processStartTime = System.currentTimeMillis();
-
         Method method = lookup(request);
-
         if (method == null) {
             RpcFrameworkException exception =
                     new RpcFrameworkException("Service method not exist: " + request.getInterfaceName() + "." + request.getMethodName());
@@ -43,14 +40,12 @@ public class DefaultProvider<T> extends AbstractProvider<T> {
             return response;
         }
         try {
+            method.setAccessible(true);
             Object result = method.invoke(proxyImpl, request.getArguments());
             response.setResult(result);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            response.setException(new RpcBizException("invoke failure", e));
         }
-        response.setProcessTime(System.currentTimeMillis() - processStartTime);
         return response;
     }
 }

@@ -15,4 +15,6 @@ public interface Protocol {
     <T> Reference<T> refer(Class<T> clz, URL url, URL serviceUrl);
 
     <T> Exporter<T> export(Provider<T> provider, URL url);
+
+    void destroy();
 }

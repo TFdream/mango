@@ -8,6 +8,7 @@ import mango.core.Response;
 import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
 import mango.exception.RpcServiceException;
+import mango.protocol.ProtocolFilterWrapper;
 import mango.registry.NotifyListener;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
@@ -47,7 +48,7 @@ public class DefaultCluster<T> implements Cluster<T>, NotifyListener {
         this.registryUrls = registryUrls;
         this.interfaceClass = interfaceClass;
         this.url = url;
-        protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(url.getProtocol());
+        protocol = new ProtocolFilterWrapper(ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(url.getProtocol()));
     }
 
     @Override

@@ -36,6 +36,11 @@ public class DefaultRpcProtocol extends AbstractProtocol {
         return new DefaultRpcExporter<>(provider, url);
     }
 
+    @Override
+    public void destroy() {
+
+    }
+
     class DefaultRpcReference<T> extends AbstractReference<T> {
         private NettyClient client;
 

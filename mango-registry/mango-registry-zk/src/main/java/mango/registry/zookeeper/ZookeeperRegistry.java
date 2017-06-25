@@ -1,6 +1,5 @@
 package mango.registry.zookeeper;
 
-import mango.common.Closeable;
 import mango.common.URL;
 import mango.exception.RpcFrameworkException;
 import mango.registry.AbstractRegistry;
@@ -22,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Ricky Fung
  */
-public class ZookeeperRegistry extends AbstractRegistry implements Closeable {
+public class ZookeeperRegistry extends AbstractRegistry {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final ReentrantLock clientLock = new ReentrantLock();
@@ -187,7 +186,7 @@ public class ZookeeperRegistry extends AbstractRegistry implements Closeable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.zkClient.close();
     }
 }

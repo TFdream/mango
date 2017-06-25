@@ -10,4 +10,6 @@ import mango.common.URL;
 public interface Registry extends RegistryService, DiscoveryService {
 
     URL getUrl();
+
+    void close();
 }

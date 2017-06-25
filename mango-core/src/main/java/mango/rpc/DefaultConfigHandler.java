@@ -9,6 +9,7 @@ import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
 import mango.exception.RpcFrameworkException;
+import mango.protocol.ProtocolFilterWrapper;
 import mango.proxy.ProxyFactory;
 import mango.proxy.ReferenceInvocationHandler;
 import mango.registry.Registry;
@@ -51,7 +52,7 @@ public class DefaultConfigHandler implements ConfigHandler {
 
         String protocolName = serviceUrl.getParameter(URLParam.protocol.getName(), URLParam.protocol.getValue());
         Provider<T> provider = new DefaultProvider<T>(ref, serviceUrl, interfaceClass);
-        Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName);
+        Protocol protocol = new ProtocolFilterWrapper(ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(protocolName));
         Exporter<T> exporter = protocol.export(provider, serviceUrl);
 
         // register service
