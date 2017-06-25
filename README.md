@@ -181,4 +181,4 @@ public class ClientApp {
 ```
 
 ### 2. Asynchronous calls
-TODO
+In developing.
