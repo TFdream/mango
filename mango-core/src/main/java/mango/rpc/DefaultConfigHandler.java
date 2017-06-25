@@ -1,5 +1,6 @@
 package mango.rpc;
 
+import com.google.common.collect.ArrayListMultimap;
 import mango.cluster.Cluster;
 import mango.cluster.DefaultCluster;
 import mango.cluster.HaStrategy;
@@ -12,6 +13,8 @@ import mango.proxy.ProxyFactory;
 import mango.proxy.ReferenceInvocationHandler;
 import mango.registry.Registry;
 import mango.registry.RegistryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -21,6 +24,7 @@ import java.util.List;
  * @author Ricky Fung
  */
 public class DefaultConfigHandler implements ConfigHandler {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public <T> Cluster<T> buildCluster(Class<T> interfaceClass, URL refUrl, List<URL> registryUrls) {
@@ -54,6 +58,38 @@ public class DefaultConfigHandler implements ConfigHandler {
         register(registryUrls, serviceUrl);
 
         return exporter;
+    }
+
+    @Override
+    public <T> void unexport(List<Exporter<T>> exporters, ArrayListMultimap<URL, URL> registryUrls) {
+        try {
+            unRegister(registryUrls);
+        } catch (Exception e){
+            logger.warn("Exception when unexport registryUrls:{}", registryUrls);
+        }
+
+        for (Exporter<T> exporter : exporters) {
+            try {
+                exporter.unexport();
+            } catch (Exception e) {
+                logger.warn("Exception when unexport exporters:{}", exporters);
+            }
+        }
+    }
+
+    private void unRegister(ArrayListMultimap<URL, URL> registryUrls) {
+
+        for (URL serviceUrl : registryUrls.keySet()) {
+            for (URL url : registryUrls.get(serviceUrl)) {
+                try {
+                    RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getExtension(url.getProtocol());
+                    Registry registry = registryFactory.getRegistry(url);
+                    registry.unregister(serviceUrl);
+                } catch (Exception e) {
+                    logger.warn(String.format("unregister url false:%s", url), e);
+                }
+            }
+        }
     }
 
     private void register(List<URL> registryUrls, URL serviceUrl) {

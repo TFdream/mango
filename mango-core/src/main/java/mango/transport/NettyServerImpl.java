@@ -14,6 +14,7 @@ import mango.core.DefaultRequest;
 import mango.core.DefaultResponse;
 import mango.exception.RpcFrameworkException;
 import mango.rpc.MessageRouter;
+import mango.rpc.RpcContext;
 import mango.util.Constants;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class NettyServerImpl extends AbstractServer {
     private ThreadPoolExecutor pool;    //业务处理线程池
     private MessageRouter router;
 
-    private volatile boolean initializing;
+    private volatile boolean initializing = false;
 
     public NettyServerImpl(URL url, MessageRouter router){
         super(url);
@@ -171,7 +172,13 @@ public class NettyServerImpl extends AbstractServer {
                 @Override
                 public void run() {
 
-                    processRpcRequest(context, request, processStartTime);
+                    try {
+                        RpcContext.init(request);
+                        processRpcRequest(context, request, processStartTime);
+                    } finally {
+                        RpcContext.destroy();
+                    }
+
                 }
             });
         } catch (RejectedExecutionException e) {

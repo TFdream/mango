@@ -1,5 +1,6 @@
 package mango.config;
 
+import com.google.common.collect.ArrayListMultimap;
 import mango.common.URL;
 import mango.common.URLParam;
 import mango.core.extension.ExtensionLoader;
@@ -27,7 +28,8 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private volatile boolean exported = false;
-    private List<Exporter<T>> exporters = new CopyOnWriteArrayList<Exporter<T>>();
+    private List<Exporter<T>> exporters = new CopyOnWriteArrayList<>();
+    private ArrayListMultimap<URL, URL> registeredUrls = ArrayListMultimap.create();
     private Class<T> interfaceClass;
     private T ref;
 
@@ -36,7 +38,6 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
             logger.warn(String.format("%s has already been exported, so ignore the export request!", interfaceName));
             return;
         }
-        exported = true;
 
         if (ref == null) {
             throw new IllegalStateException("ref not allow null!");
@@ -63,6 +64,7 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
             doExport(protocol, registryUrls);
         }
+        exported = true;
     }
 
     private void doExport(ProtocolConfig protocol, List<URL> registryUrls) {
@@ -84,6 +86,10 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
         map.put(URLParam.timestamp.getName(), String.valueOf(System.currentTimeMillis()));
 
         URL serviceUrl = new URL(protocolName, hostAddress, port, interfaceClass.getName(), map);
+
+        for(URL ru : registryUrls) {
+            registeredUrls.put(serviceUrl, ru);
+        }
 
         ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
         exporters.add(configHandler.export(interfaceClass, ref, serviceUrl, registryUrls));
@@ -111,6 +117,15 @@ public class ServiceConfig<T> extends AbstractInterfaceConfig {
 
     protected void destroy0() throws Exception {
 
+        if(!exported) {
+            return;
+        }
+
+        ConfigHandler configHandler = ExtensionLoader.getExtensionLoader(ConfigHandler.class).getExtension(Constants.DEFAULT_VALUE);
+        configHandler.unexport(exporters, registeredUrls);
+
+        exporters.clear();
+        registeredUrls.clear();
     }
 
 }

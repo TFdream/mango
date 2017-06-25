@@ -1,10 +1,12 @@
 package mango.rpc;
 
+import com.google.common.collect.ArrayListMultimap;
 import mango.cluster.Cluster;
 import mango.common.URL;
 import mango.core.extension.SPI;
 import mango.util.Constants;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,5 +38,7 @@ public interface ConfigHandler {
      * @return
      */
     <T> Exporter<T> export(Class<T> interfaceClass, T ref, URL serviceUrl, List<URL> registryUrls);
+
+    <T> void unexport(List<Exporter<T>> exporters, ArrayListMultimap<URL, URL> registryUrls);
 
 }

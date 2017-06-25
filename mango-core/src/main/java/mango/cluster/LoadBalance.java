@@ -2,6 +2,7 @@ package mango.cluster;
 
 import mango.core.Request;
 import mango.core.extension.SPI;
+import mango.core.extension.Scope;
 import mango.rpc.Reference;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  *
  * @author Ricky Fung
  */
-@SPI("random")
+@SPI(scope = Scope.PROTOTYPE)
 public interface LoadBalance<T> {
 
     void setReferences(List<Reference<T>> references);

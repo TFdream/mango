@@ -9,7 +9,7 @@ import mango.util.Constants;
  *
  * @author Ricky Fung
  */
-@SPI(Constants.FRAMEWORK_NAME)
+@SPI(value = Constants.FRAMEWORK_NAME)
 public interface Protocol {
 
     <T> Reference<T> refer(Class<T> clz, URL url, URL serviceUrl);
