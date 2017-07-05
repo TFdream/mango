@@ -11,7 +11,7 @@ import mango.core.Request;
  *
  * @author Ricky Fung
  */
-public class MangoFrameworkUtils {
+public class FrameworkUtils {
 
     /**
      * 默认本地注册中心

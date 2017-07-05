@@ -9,7 +9,7 @@ import mango.transport.NettyClient;
 import mango.transport.NettyClientImpl;
 import mango.transport.NettyServer;
 import mango.transport.NettyServerImpl;
-import mango.util.MangoFrameworkUtils;
+import mango.util.FrameworkUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +123,7 @@ public class DefaultRpcProtocol extends AbstractProtocol {
 
         @Override
         public void unexport() {
-            String protocolKey = MangoFrameworkUtils.getProtocolKey(url);
+            String protocolKey = FrameworkUtils.getProtocolKey(url);
             String ipPort = url.getServerAndPort();
 
             Exporter<T> exporter = (Exporter<T>) exporterMap.remove(protocolKey);

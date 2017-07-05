@@ -5,12 +5,10 @@ import mango.core.Request;
 import mango.core.Response;
 import mango.exception.RpcBizException;
 import mango.exception.RpcFrameworkException;
-import mango.util.MangoFrameworkUtils;
+import mango.util.FrameworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,7 +29,7 @@ public class MessageRouter implements MessageHandler {
     @Override
     public Response handle(Request request) {
 
-        String serviceKey = MangoFrameworkUtils.getServiceKey(request);
+        String serviceKey = FrameworkUtils.getServiceKey(request);
 
         Provider<?> provider = providers.get(serviceKey);
 
@@ -60,7 +58,7 @@ public class MessageRouter implements MessageHandler {
     }
 
     public synchronized void addProvider(Provider<?> provider) {
-        String serviceKey = MangoFrameworkUtils.getServiceKey(provider.getUrl());
+        String serviceKey = FrameworkUtils.getServiceKey(provider.getUrl());
         if (providers.containsKey(serviceKey)) {
             throw new RpcFrameworkException("provider alread exist: " + serviceKey);
         }
@@ -69,7 +67,7 @@ public class MessageRouter implements MessageHandler {
     }
 
     public synchronized void removeProvider(Provider<?> provider) {
-        String serviceKey = MangoFrameworkUtils.getServiceKey(provider.getUrl());
+        String serviceKey = FrameworkUtils.getServiceKey(provider.getUrl());
         providers.remove(serviceKey);
         logger.info("RequestRouter removeProvider: url=" + provider.getUrl());
     }

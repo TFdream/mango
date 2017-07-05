@@ -3,7 +3,7 @@ package mango.protocol;
 import mango.common.URL;
 import mango.exception.RpcFrameworkException;
 import mango.rpc.*;
-import mango.util.MangoFrameworkUtils;
+import mango.util.FrameworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public abstract class AbstractProtocol implements Protocol {
             throw new RpcFrameworkException(this.getClass().getSimpleName() + " export Error: provider is null, url=" + url);
         }
 
-        String protocolKey = MangoFrameworkUtils.getProtocolKey(url);
+        String protocolKey = FrameworkUtils.getProtocolKey(url);
 
         synchronized (exporterMap) {
             Exporter<T> exporter = (Exporter<T>) exporterMap.get(protocolKey);
