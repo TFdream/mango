@@ -10,7 +10,9 @@ RPC（Remote Procedure Call ）——远程过程调用，它是一种通过网�
 * [rpcx ](https://github.com/smallnest/rpcx)：[https://github.com/smallnest/rpcx](https://github.com/smallnest/rpcx) 
 * [Apache Thrift ](https://thrift.apache.org/)：[https://thrift.apache.org/](https://thrift.apache.org/)
 
-### 一次RPC调用的流程：
+### 一次RPC调用的流程
+如下图所示: 
+<br>
 ![rpc_procedure](media/rpc_procedure.png)
 
 过程描述如下：
@@ -30,7 +32,6 @@ RPC的目标就是要2~8这些步骤都封装起来，让用户对这些细节�
 在RPC框架中主要有三个角色：Provider、Consumer和Registry。如下图所示：
 
 ![dubbo-architecture](media/dubbo-architecture.png)
-
 
 ### 节点角色说明：
 * Provider: 暴露服务的服务提供方。
