@@ -47,6 +47,7 @@ RPC的目标就是要2~8这些步骤都封装起来，让用户对这些细节�
 
 ## 技术要点
 一个简单的RPC框架架构如下：
+<br>
 ![rpc_architecture](media/rpc_architecture.png)
 
 主要技术要点如下：
