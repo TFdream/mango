@@ -47,7 +47,7 @@ public enum URLParam {
     registryAddress("reg_address", "localhost"),
 
     registrySessionTimeout("reg_session_timeout", 60*1000),
-    registryConnectTimeout("reg_connect_timeout", 2000),
+    registryConnectTimeout("reg_connect_timeout", 5000),
 
     side("side", ""),
     timestamp("timestamp", 0),

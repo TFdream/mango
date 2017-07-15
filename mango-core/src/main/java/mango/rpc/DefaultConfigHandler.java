@@ -107,7 +107,7 @@ public class DefaultConfigHandler implements ConfigHandler {
                 registry.register(serviceUrl);
             } catch (Exception e) {
                 throw new RpcFrameworkException("register error! Could not registry service:" + serviceUrl.getPath()
-                        + " for " + registryUrl.getProtocol());
+                        + " for " + registryUrl.getProtocol(), e);
             }
         }
     }

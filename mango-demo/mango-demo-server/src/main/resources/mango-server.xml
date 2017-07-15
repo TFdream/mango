@@ -13,11 +13,13 @@
     <context:annotation-config/>
     <context:component-scan base-package="mango.demo"/>
 
-    <mango:application name="mango-server" />
+    <context:property-placeholder location="classpath:config.properties" />
 
-    <mango:protocol name="mango" port="21918" />
+    <mango:application name="${application.name}" />
 
-    <mango:registry protocol="zookeeper" address="localhost:2181" connect-timeout="2000" session-timeout="60000" />
+    <mango:protocol name="mango" port="${protocol.port}" />
+
+    <mango:registry protocol="zookeeper" address="${registry.address}" />
 
     <!--export services -->
     <mango:service interface="mango.demo.service.DemoService" ref="demoService" group="group1" version="1.0.0" />

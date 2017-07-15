@@ -154,20 +154,8 @@ public class MangoBeanDefinitionParser implements BeanDefinitionParser {
 
         String value = element.getAttribute(name);
         if (StringUtils.isNotBlank(value)) {
-
             String property = alias!=null ? alias:name;
-
-            if("port".equals(name) || "buffer-size".equals(name) || "payload".equals(name) || "heartbeat".equals(name)
-                    || "min-pool-size".equals(name) || "max-pool-size".equals(name)
-                    || "timeout".equals(name)|| "session-timeout".equals(name)|| "connect-timeout".equals(name)
-                    || "retries".equals(name)){
-
-                bd.getPropertyValues().addPropertyValue(property, Integer.parseInt(value));
-            } if("default".equals(name) ||"check".equals(name) ||"async".equals(name)) {
-                bd.getPropertyValues().addPropertyValue(property, Boolean.valueOf(value));
-            } else {
-                bd.getPropertyValues().addPropertyValue(property, value);
-            }
+            bd.getPropertyValues().addPropertyValue(property, value);
         }
     }
 
