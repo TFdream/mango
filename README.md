@@ -25,20 +25,20 @@ The minimum requirements to run the quick start are:
     <dependency>
         <groupId>com.mindflow</groupId>
         <artifactId>mango-core</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </dependency>
 
     <dependency>
         <groupId>com.mindflow</groupId>
         <artifactId>mango-registry-zk</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </dependency>
     
     <!-- dependencies blow were only needed for spring integrated -->
     <dependency>
         <groupId>com.mindflow</groupId>
         <artifactId>mango-springsupport</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </dependency>
     <dependency>
         <groupId>org.springframework</groupId>
